@@ -14,13 +14,13 @@ conan_cmake_run(REQUIRES
     BASIC_SETUP CMAKE_TARGETS NO_OUTPUT_DIRS
     BUILD missing
     OPTIONS
-        boost:shared=False 
-        boost:without_test=False 
-        boost:without_program_options=False 
-        boost:without_filesystem=False 
-        boost:without_system=False 
-        boost:without_exception=False
-        boost:without_contract=False
+        boost/shared=False
+        boost/without_test=False
+        boost/without_program_options=False
+        boost/without_filesystem=False
+        boost/without_system=False
+        boost/without_exception=False
+        boost/without_contract=False
 )
 conan_basic_setup(NO_OUTPUT_DIRS KEEP_RPATHS)
 
