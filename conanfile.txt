@@ -1,0 +1,12 @@
+# Initializing a Debug build
+#   conan install .. --build missing -s build_type=Debug
+
+[requires]
+boost/1.74.0
+
+[generators]
+cmake
+
+[options]
+boost:without_fiber=True
+boost:without_nowide=True
