@@ -45,6 +45,9 @@ jobs:
     - name: Create Conan default profile
       run: conan profile detect
 
+    - name: Install Conan packages
+      run: conan install ${{github.workspace}} --build missing -s build_type=$BUILD_TYPE
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
