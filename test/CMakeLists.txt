@@ -8,7 +8,7 @@ function(create_test testname FILES)
 
     target_link_libraries(test_${testname}
         PUBLIC
-            ${CONAN_LIBS_BOOST}
+            ${Boost_LIBRARIES}
             coverage_config
     )
 
@@ -22,5 +22,9 @@ set(SOURCE_FILES
     ../src/lib/MyClass
     ../src/lib/MyClass.cpp
 )
+
+
+# find Boost package
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 create_test("MyClass" "${SOURCE_FILES}")
