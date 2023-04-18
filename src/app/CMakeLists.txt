@@ -10,8 +10,9 @@ add_executable("${CMAKE_PROJECT_NAME}"
     ${HEADER_FILES}
 )
 
+find_package(Boost REQUIRED COMPONENTS system)
 target_link_libraries("${CMAKE_PROJECT_NAME}"
     PUBLIC
         MyLib
-        ${CONAN_LIBS}
+        Boost::system
 )

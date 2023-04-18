@@ -9,9 +9,8 @@ Checkout the code and create a folder in the repository folder called `build`.
 ```
 git clone https://github.com/zethon/CCCBTemplate.git
 cd CCCBTemplate
-mkdir build
-cd build
-conan install .. --build missing -s build_type=Debug
+docker-compose build
+docker-compose up
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 cmake --build .
 ```
