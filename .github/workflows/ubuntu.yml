@@ -23,8 +23,5 @@ jobs:
     - name: Build Docker image
       run: docker-compose build
 
-    - name: Configure CMake project
-      run: docker-compose run builder /bin/bash -c "cmake -B build -S project -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON"
-
-    - name: Build project
-      run: docker-compose run builder /bin/bash -c "cmake --build build"
+    - name: Configure CMake project and build project
+      run: docker-compose run builder /bin/bash -c "cmake -B build -S project -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON && cmake --build build"
