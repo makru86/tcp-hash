@@ -4,12 +4,12 @@
 namespace app
 {
 
-class MyClass
+class TcpServer
 {
     std::string _text;
 
 public:
-    explicit MyClass(const std::string& text);
+    explicit TcpServer(const std::string& text);
 
     std::string appendIt(const std::string& extra) const;
     std::string text() const;
