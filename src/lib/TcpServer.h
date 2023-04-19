@@ -8,11 +8,10 @@
 
 namespace app {
 
+    using boost::asio::ip::tcp;
+
     class TcpServer {
     public:
-
-        using tcp = boost::asio::ip::tcp;
-
         TcpServer(boost::asio::io_context &io_context, const tcp::endpoint &endpoint, std::size_t num_threads)
                 : io_context_(io_context), acceptor_(io_context, endpoint) {
             // Create worker threads
@@ -35,14 +34,13 @@ namespace app {
             }
         }
 
-    private:
         void do_accept() {
             acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
                 if (!ec) {
                     std::cout << "Connection from " << socket.remote_endpoint() << std::endl;
 
                     // Handle connection in thread pool
-                    io_context_.post([&]() mutable {
+                    io_context_.post([& /*socket = std::move(socket)*/]() mutable {
                         handle_connection(std::move(socket));
                     });
                 }
@@ -51,27 +49,28 @@ namespace app {
             });
         }
 
-        static void handle_connection(tcp::socket socket) {
-            try {
-                // Read data from client
-                boost::asio::streambuf buf;
-                boost::asio::read_until(socket, buf, "\n");
-                std::string data = boost::asio::buffer_cast<const char *>(buf.data());
-                std::cout << "Received: " << data << std::endl;
+        static void handle_connection(tcp::socket socket)
+        try {
+            // Read data from client
+            boost::asio::streambuf buf;
+            boost::asio::read_until(socket, buf, "\n");
+            std::string data = boost::asio::buffer_cast<const char *>(buf.data());
+            std::cout << "Received: " << data << std::endl;
 
-                // Send response to client
-                std::string response = "Hello, " + data;
-                boost::asio::write(socket, boost::asio::buffer(response));
+            // Send response to client
+            std::string response = "Hello, " + data;
+            boost::asio::write(socket, boost::asio::buffer(response));
 
-                std::cout << "Response sent." << std::endl;
-            }
-            catch (std::exception &e) {
-                std::cerr << "Exception in thread: " << e.what() << std::endl;
-            }
+            std::cout << "Response sent." << std::endl;
+        }
+        catch (std::exception &e) {
+            std::cerr << "Exception in thread: " << e.what() << std::endl;
         }
 
+    private:
         boost::asio::io_context &io_context_;
         tcp::acceptor acceptor_;
         std::vector<std::thread> workers_;
     };
+
 }

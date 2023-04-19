@@ -1,8 +1,8 @@
 #include <iostream>
 #include "../lib/TcpServer.h"
 
+using app::tcp;
 using app::TcpServer;
-using tcp = TcpServer::tcp;
 
 int main()
 {
