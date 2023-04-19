@@ -15,6 +15,5 @@ RUN apt-get update \
       dos2unix \
       rsync \
       tar \
-      git \
       libboost-all-dev \
   && apt-get clean

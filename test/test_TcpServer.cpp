@@ -1,16 +1,11 @@
 #include <boost/asio.hpp>
-#include <iostream>
+#include <boost/test/unit_test.hpp>
 #include <string>
-#include <vector>
 
 #include "../src/lib/TcpServer.h"
 
 using app::tcp;
 using app::TcpServer;
-
-// Tests
-#define BOOST_TEST_MODULE TcpServerTest
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(test_handle_connection)
 {

@@ -1,12 +1,13 @@
 function(create_test testname)
 
     add_executable(test_${testname}
+        main.cpp
         test_${testname}.cpp
     )
 
     target_link_libraries(test_${testname} PRIVATE
             MyLib
-            Catch2::Catch2WithMain
+            ${Boost_LIBRARIES}
     )
 
     add_test(NAME test_${testname}
@@ -15,12 +16,8 @@ function(create_test testname)
 
 endfunction(create_test)
 
-Include(FetchContent)
-FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.3.2
-)
-FetchContent_MakeAvailable(Catch2)
+
+# find Boost package
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 create_test("TcpServer")
