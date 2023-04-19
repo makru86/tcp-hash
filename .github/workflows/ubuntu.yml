@@ -21,7 +21,6 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build Docker image
-      working-directory: project
       run: docker-compose build
 
     - name: Configure CMake project
