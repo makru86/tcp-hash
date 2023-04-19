@@ -1,15 +1,13 @@
-function(create_test testname FILES)
+function(create_test testname)
 
     add_executable(test_${testname}
         main.cpp
         test_${testname}.cpp
-        ${FILES}
     )
 
-    target_link_libraries(test_${testname}
-        PUBLIC
+    target_link_libraries(test_${testname} PRIVATE
+            MyLib
             ${Boost_LIBRARIES}
-            coverage_config
     )
 
     add_test(NAME test_${testname}
@@ -18,13 +16,8 @@ function(create_test testname FILES)
 
 endfunction(create_test)
 
-set(SOURCE_FILES
-    ../src/lib/MyClass
-    ../src/lib/MyClass.cpp
-)
-
 
 # find Boost package
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
-create_test("MyClass" "${SOURCE_FILES}")
+create_test("TcpServer")

@@ -1,14 +1,14 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(SOURCE_FILES
-    MyClass.cpp
+        TcpServer.cpp
 )
 
 set (MOC_HEADERS
 )
 
 set(HEADER_FILES
-    MyClass.h
+        TcpServer.h
 )
 
 add_library(MyLib STATIC
@@ -16,6 +16,11 @@ add_library(MyLib STATIC
     ${HEADER_FILES}
 )
 
-target_link_libraries(MyLib
-    coverage_config
-)
+find_package(Threads REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+
+target_link_libraries(MyLib PUBLIC
+        coverage_config
+        Boost::system
+        Threads::Threads
+        )

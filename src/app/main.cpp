@@ -1,10 +1,20 @@
 #include <iostream>
-#include "../lib/MyClass.h"
+#include "../lib/TcpServer.h"
+
+using app::TcpServer;
+using tcp = TcpServer::tcp;
 
 int main()
 {
-    app::MyClass obj("Hello");
-    std::cout << obj.appendIt("library world!!") << '\n';
-    
+    boost::asio::io_context io_context;
+    tcp::endpoint endpoint(tcp::v4(), 1234);
+
+    TcpServer server(io_context, endpoint, std::thread::hardware_concurrency());
+    server.start();
+
+    io_context.run();
+
+    server.stop();
+
     return 0;
 }
