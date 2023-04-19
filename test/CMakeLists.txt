@@ -21,3 +21,5 @@ endfunction(create_test)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 create_test("TcpServer")
+create_test("Log")
+create_test("SignalHandler")

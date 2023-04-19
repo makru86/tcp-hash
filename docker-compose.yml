@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - project:/project
+    ports:
+      - "1234:1234/tcp"
 volumes:
   project:
     driver: local
