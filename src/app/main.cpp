@@ -19,6 +19,8 @@ int main()
     TcpServer server(io_context, endpoint, std::thread::hardware_concurrency());
     server.start();
 
+    io_context.run();
+
     signal_handler.wait_for_interrupt();
 
     server.stop();

@@ -1,30 +1,31 @@
 #pragma once
 
 #include <boost/asio.hpp>
+
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
-
 #include <chrono>
 #include <iostream>
-#include "Log.h"
 
-#ifndef NDEBUG
-#else
-#define LOG_DEBUG(msg)
-#endif
+#include "Log.h"
 
 namespace app {
 
     using boost::asio::ip::tcp;
 
     class TcpServer {
+
+        boost::asio::io_context &io_context_;
+        tcp::acceptor acceptor_;
+        std::vector<std::thread> workers_;
+
     public:
         TcpServer(boost::asio::io_context &io_context, const tcp::endpoint &endpoint, std::size_t num_threads)
                 : io_context_(io_context), acceptor_(io_context, endpoint) {
-            LOG_DEBUG("Listen endpoint: " << endpoint.address() << ":" << endpoint.port());
-            LOG_DEBUG("Worker threads: " << num_threads);
+            LOG_DEBUG("Listen TCP endpoint: " << endpoint);
+            LOG_DEBUG("Number of threads: " << num_threads);
             for (std::size_t i = 0; i < num_threads; ++i) {
                 workers_.emplace_back([this]() {
                     io_context_.run();
@@ -48,6 +49,10 @@ namespace app {
             acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
                 if (!ec) {
                     LOG_DEBUG("Connection from " << socket.remote_endpoint());
+
+//                    socket.set_option(tcp::no_delay(true));
+//                    socket.set_option(boost::asio::socket_base::send_buffer_size(65536));
+//                    socket.set_option(boost::asio::socket_base::receive_buffer_size(65536));
 
                     // Handle connection in thread pool
                     io_context_.post([& /*socket = std::move(socket)*/]() mutable {
@@ -76,11 +81,6 @@ namespace app {
         catch (std::exception &e) {
             LOG_ERROR("Exception in thread: " << e.what());
         }
-
-    private:
-        boost::asio::io_context &io_context_;
-        tcp::acceptor acceptor_;
-        std::vector<std::thread> workers_;
     };
 
 }

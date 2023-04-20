@@ -11,6 +11,7 @@ function(create_test testname)
     )
 
     add_test(NAME test_${testname}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_${testname}
     )
 

@@ -3,18 +3,21 @@
 #include <chrono>
 #include <iostream>
 
+#define TCP_HASH_LOG_MESSAGE(severity, msg) \
+    "[" << app::Log::micros_since_epoch() << "us] [" severity "] " << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl
+
 #ifndef NDEBUG
 #define LOG_DEBUG(msg) { \
-std::cout << "[" << app::Log::micros_since_epoch() << "us] [DEBUG] " << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl; }
+std::cout << TCP_HASH_LOG_MESSAGE("DEBUG", msg); }
 #else
 #define LOG_DEBUG(msg)
 #endif
 
 #define LOG_INFO(msg) { \
-std::cout << "[" << app::Log::micros_since_epoch() << "us] [INFO ] " << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl; }
+std::cout << TCP_HASH_LOG_MESSAGE("INFO ", msg); }
 
 #define LOG_ERROR(msg) { \
-std::cerr << "[" << app::Log::micros_since_epoch() << "us] [ERROR] " << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl; }
+std::cerr << TCP_HASH_LOG_MESSAGE("ERROR", msg); }
 
 namespace app {
     class Log {
