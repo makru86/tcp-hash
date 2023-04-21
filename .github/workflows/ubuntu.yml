@@ -25,12 +25,12 @@ jobs:
         run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
 
       - name: Create coverage report
-        run: gcovr --cobertura-pretty build/src
+        run: gcovr --cobertura-pretty --output build/coverage.xml build/src
 
       - name: Code Coverage Github Badge
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: build/src/**/*.cpp.gcno
+          filename: build/coverage.xml
           badge: true
           fail_below_min: true
           format: markdown
