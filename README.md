@@ -1,5 +1,8 @@
 # Project tcp-hash
 
+
+[](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
+
 ## Building
 
 Checkout the code, create Docker container, and build CMake project.
