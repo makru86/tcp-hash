@@ -1,7 +1,7 @@
 # Project tcp-hash
 
 ![](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
-![](https://img.shields.io/scrutinizer/coverage/g/makru86/tcp-hash?style=plastic)
+![](https://img.shields.io/badge/Code%20Coverage-55%25-success?style=flat)
 
 Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 
@@ -66,4 +66,10 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 
 ```
     make loadtest
+```
+
+### Code coverage report
+
+```
+    make coverage-report
 ```
