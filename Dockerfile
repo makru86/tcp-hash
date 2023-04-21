@@ -17,6 +17,10 @@ RUN apt-get update \
       tar \
     libboost-all-dev \
     libxxhash-dev \
+    googletest         \
+    libbenchmark1      \
+    libbenchmark-dev   \
+    libbenchmark-tools \
     \
     ncat \
     xxhash \
