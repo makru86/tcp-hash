@@ -24,6 +24,9 @@ jobs:
       - name: Code Coverage
         run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
 
+      - name: Find gcno files
+        run: docker-compose run builder bash -c "find build/src -name '*.gcno'"
+
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
