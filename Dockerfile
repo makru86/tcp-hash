@@ -15,11 +15,13 @@ RUN apt-get update \
       dos2unix \
       rsync \
       tar \
-      libboost-all-dev \
-      netcat \
-      nmap \
-      netcat-openbsd \
-      ncat \
-      xxhash \
-      libxxhash-dev \
+    libboost-all-dev \
+    libxxhash-dev \
+    \
+    ncat \
+    xxhash \
+    \
+    netcat \
+    nmap \
+    netcat-openbsd \
   && apt-get clean
