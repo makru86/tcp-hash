@@ -12,5 +12,5 @@ loadtest:
 
 coverage-report:
 	@echo "Generating coverage report..."
-	@docker-compose run builder gcovr --xml build/coverage.xml build/src
+	@docker-compose run builder gcovr --xml build/coverage.xml build
 	@ls build/coverage.xml
