@@ -18,6 +18,7 @@ RUN apt-get update \
       libboost-all-dev \
       netcat \
       nmap \
+      netcat-openbsd \
       ncat \
       xxhash \
       libxxhash-dev \
