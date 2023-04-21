@@ -27,7 +27,7 @@ jobs:
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: project/build/src/**/*.gcno
+          filename: ./**/*.gcno
           badge: true
           fail_below_min: true
           format: markdown
