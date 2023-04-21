@@ -1,6 +1,3 @@
 #include "TcpServer.h"
 
-namespace app
-{
-
-}
+namespace app {}

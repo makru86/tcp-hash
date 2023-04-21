@@ -24,4 +24,7 @@ RUN apt-get update \
     netcat \
     nmap \
     netcat-openbsd \
+    \
+    clang-format \
+    clang-tidy \
   && apt-get clean

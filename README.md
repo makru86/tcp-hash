@@ -2,7 +2,7 @@
 
 ![](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
 
-Ubuntu packages used in implementation (see `Dockerfile`):
+Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 
 - libboost-all-dev
 - libxxhash-dev
@@ -19,14 +19,14 @@ Checkout the code, create Docker container, and build CMake project:
 
 ## Running mock
 
-Mock server implemented as a shell script using utilities `ncat` server and `xxhsum` (see `mock/tcp_hash.sh`).
-Start Docker service `mock`  listening TCP port 1234:
+Mock server implemented as a shell script using utilities `ncat` server and `xxhsum`
+(see [mock/tcp_hash.sh](mock/tcp_hash.sh)). Start Docker service `mock`  listening TCP port 1234:
 
 ```
-    docker-compose \
-    -f docker-compose.yml \
-    -f docker-compose.mock.yml \
-    up mock
+    docker-compose                 \
+        -f docker-compose.yml      \
+        -f docker-compose.mock.yml \
+        up mock
 ```
 
 ## Using with netcat
@@ -43,10 +43,20 @@ netcat example, keep connection open, exit by Ctrl-C:
 
 ## Using with netcat-openbsd
 
-netcat-openbsd (nc) example, closing connection after receiving response.
-Option `-W recvlimit`: Terminate after receiving recvlimit packets from the network.
+netcat-openbsd (nc) example, closing connection after receiving response:
 
 ```
-    echo "Hello, world!" | nc -W1 localhost 1234
+    echo "Hello, world!" | nc -W 1 localhost 1234
 >>> 0x2c6b514f4f9e3e3c
+```
+
+`nc` option `-W recvlimit`:
+> Terminate after receiving *recvlimit* packets from the network.
+
+## Development
+
+### Formatting code
+
+```
+    make format-code
 ```
