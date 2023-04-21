@@ -1,6 +1,7 @@
 # Project tcp-hash
 
 ![](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
+![](https://img.shields.io/scrutinizer/coverage/g/makru86/tcp-hash?style=plastic)
 
 Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 
