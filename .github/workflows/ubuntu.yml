@@ -20,8 +20,5 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build Docker image
-      run: docker-compose build
-
-    - name: Configure CMake project and build project
-      run: docker-compose run builder /bin/bash -c "cmake -B build -S project -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_UNIT_TESTS=ON && cmake --build build"
+    - name: Docker Compose Up
+      run: docker-compose up
