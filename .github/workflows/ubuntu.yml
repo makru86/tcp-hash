@@ -22,7 +22,7 @@ jobs:
         run: docker-compose up
 
       - name: Code Coverage
-        run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --force-recreate builder
+        run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
 
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
