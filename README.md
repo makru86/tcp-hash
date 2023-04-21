@@ -71,5 +71,11 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 ### Code coverage report
 
 ```
+    env CODE_COVERAGE=ON docker-compose up
     make coverage-report
+>>> Generating coverage report...
+>>> lines: 54.9% (79 out of 144)
+>>> branches: 36.6% (232 out of 634)
+>>> build/coverage.xml
+
 ```
