@@ -6,6 +6,10 @@ option(BUILD_UNIT_TESTS "Build unit tests (default OFF)" OFF)
 option(BUILD_LOAD_TESTS "Build load tests (default OFF)" OFF)
 option(CODE_COVERAGE "Enable coverage reporting (default OFF)" OFF)
 
+message(STATUS "Build unit tests: ${BUILD_UNIT_TESTS}")
+message(STATUS "Build load tests: ${BUILD_LOAD_TESTS}")
+message(STATUS "Code coverage: ${CODE_COVERAGE}")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

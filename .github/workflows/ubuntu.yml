@@ -13,10 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         build_type: [ Debug, Release ]
-        code_coverage: [ ON, OFF ]
-    env:
-      BUILD_TYPE: ${{ matrix.build_type }}
-      CODE_COVERAGE: ${{ matrix.code_coverage }}
 
     steps:
       - name: Checkout code
@@ -24,6 +20,9 @@ jobs:
 
       - name: Docker Compose Up
         run: docker-compose up
+
+      - name: Code Coverage
+        run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up builder --force-recreate --build
 
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
