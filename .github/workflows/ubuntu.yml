@@ -12,13 +12,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build_type: [Debug, Release]
+        build_type: [ Debug, Release ]
+        code_coverage: [ ON, OFF ]
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
+      CODE_COVERAGE: ${{ matrix.code_coverage }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Docker Compose Up
-      run: docker-compose up
+      - name: Docker Compose Up
+        run: docker-compose up
+
+      - name: Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: project/build/src/**/*.gcno
+          badge: true
+          fail_below_min: true
+          format: markdown
+          indicators: true
+          output: both
+          thresholds: '20 40'
