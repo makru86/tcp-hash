@@ -16,4 +16,9 @@ RUN apt-get update \
       rsync \
       tar \
       libboost-all-dev \
+      netcat \
+      nmap \
+      ncat \
+      xxhash \
+      libxxhash-dev \
   && apt-get clean
