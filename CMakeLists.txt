@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(tcp_hash)
 
 option(BUILD_UNIT_TESTS "Build unit tests (default OFF)" OFF)
+option(BUILD_LOAD_TESTS "Build load tests (default OFF)" OFF)
 option(CODE_COVERAGE "Enable coverage reporting (default OFF)" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -27,4 +28,8 @@ add_subdirectory(src)
 if (BUILD_UNIT_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if (BUILD_LOAD_TESTS)
+    add_subdirectory(loadtest)
 endif()

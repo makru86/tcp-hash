@@ -60,3 +60,9 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 ```
     make format-code
 ```
+
+### Benchmarking performance
+
+```
+    make loadtest
+```
