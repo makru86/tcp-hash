@@ -31,4 +31,5 @@ RUN apt-get update \
     \
     clang-format \
     clang-tidy \
+    gcovr \
   && apt-get clean
