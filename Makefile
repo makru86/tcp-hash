@@ -1,4 +1,4 @@
-.PHONY: format-code loadtest
+.PHONY: format-code loadtest coverage-report
 
 format-code:
 	@echo "Formatting code..."
@@ -9,3 +9,8 @@ loadtest:
 	@echo "Running loadtests..."
 	@docker-compose run builder \
 		./build/loadtest/loadtest
+
+coverage-report:
+	@echo "Generating coverage report..."
+	@docker-compose run builder gcovr --xml build/coverage.xml build/src
+	@ls build/coverage.xml

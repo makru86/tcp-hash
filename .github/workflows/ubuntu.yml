@@ -21,13 +21,11 @@ jobs:
       - name: Docker Compose Up
         run: docker-compose up
 
-      - name: Code Coverage
+      - name: Coverage Docker Compose Up
         run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
-
-      - name: Create coverage report
-        run: docker-compose run builder gcovr --cobertura-pretty --output build/coverage.xml build/src
-
-      - name: Code Coverage Github Badge
+      - name: Coverage gcno Files
+        run: make coverage-report
+      - name: Coverage Github Badge
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: build/coverage.xml
