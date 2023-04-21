@@ -1,13 +1,26 @@
 services:
+
+  # Service to build and run project
   builder:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
       - project:/project
+    working_dir: /project
     ports:
-      - "1234:1234/tcp"
+      - "1234:1234"
+    command:
+      - bash
+      - -c
+      - |
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON
+        cmake --build build --target all -- -j4
+        cd build && ctest
+
 volumes:
+
+  # Project directory
   project:
     driver: local
     driver_opts:
