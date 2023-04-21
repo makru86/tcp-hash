@@ -1,7 +1,7 @@
 # Project tcp-hash
 
 
-[](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
+[Github Actions Badge](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
 
 ## Building
 
