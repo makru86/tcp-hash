@@ -56,10 +56,11 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 
 ## Development
 
-### Formatting code
+### Formatting code, clang-tidy
 
 ```
     make format-code
+    make tidy-code
 ```
 
 ### Benchmarking performance
@@ -77,5 +78,4 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 >>> lines: 54.9% (79 out of 144)
 >>> branches: 36.6% (232 out of 634)
 >>> build/coverage.xml
-
 ```

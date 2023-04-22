@@ -28,6 +28,7 @@ RUN apt-get update \
     netcat \
     nmap \
     netcat-openbsd \
+    vim \
     \
     clang-format \
     clang-tidy \
