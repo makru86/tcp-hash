@@ -34,4 +34,4 @@ jobs:
           format: markdown
           indicators: true
           output: both
-          thresholds: '0 40'
+          thresholds: '20 40'
