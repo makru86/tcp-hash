@@ -1,5 +1,13 @@
 .PHONY: format-code loadtest coverage-report
 
+up: format-code
+	@echo "Building, testing, and starting service on 0.0.0.0:1234 in Docker..."
+	@docker-compose up builder --force-recreate --remove-orphans  --build
+
+down:
+	@echo "The Pressure is Rising, The Adrenaline is Rushing, The Clock is Ticking"
+	@docker-compose down --remove-orphans
+
 format-code:
 	@echo "Formatting code..."
 	@docker-compose run builder bash -c \

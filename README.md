@@ -10,12 +10,13 @@ Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 
 ## Building and running
 
-Checkout the code, create Docker container, and build CMake project:
+Checkout the code, create Docker container, build CMake project, run tests,
+start Docker service listening TCP port 1234:
 
 ```
     git clone https://github.com/makru86/tcp-hash.git
     cd tcp-hash
-    docker-compose up
+    make up
 ```
 
 ## Running mock
