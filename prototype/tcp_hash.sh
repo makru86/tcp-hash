@@ -3,7 +3,7 @@
 # tcp-hash.sh - a TCP port 1234 listener that processes
 #               incoming data with handler.sh.
 #
-# Usage:  ./tcp-hash.sh
+# Usage:  ./prototype/tcp-hash.sh
 # Press Ctrl-C to exit.
 
 THIS_DIR=$(dirname "$0")

@@ -27,3 +27,11 @@ coverage-report:
 	@echo "Generating coverage report..."
 	@docker-compose run builder gcovr --print-summary --xml build/coverage.xml --xml-pretty build
 	@ls build/coverage.xml
+
+prototype-up:
+	@echo "Starting prototype..."
+	@docker-compose -f docker-compose.yml -f docker-compose.mock.yml up prototype
+
+prototype-down:
+	@echo "Stopping prototype..."
+	@docker-compose -f docker-compose.yml -f docker-compose.mock.yml down --remove-orphans

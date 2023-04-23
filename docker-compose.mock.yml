@@ -1,7 +1,7 @@
 services:
 
-  # Mock service
-  mock:
+  # Prototype service
+  prototype:
     extends:
       file: docker-compose.yml
       service: builder
@@ -9,4 +9,4 @@ services:
       - bash
       - -c
       - |
-        ./mock/tcp_hash.sh
+        ./prototype/tcp_hash.sh

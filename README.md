@@ -19,16 +19,14 @@ start Docker service listening TCP port 1234:
     make up
 ```
 
-## Running mock
+## tcp-hash Prototype: shell script with ncat and xxhsum
 
-Mock server implemented as a shell script using utilities `ncat` server and `xxhsum`
-(see [mock/tcp_hash.sh](mock/tcp_hash.sh)). Start Docker service `mock`  listening TCP port 1234:
+See [mock/tcp_hash.sh](mock/tcp_hash.sh).
+Start Docker service `prototype`  listening TCP port 1234:
+Press Ctrl-C to stop.
 
 ```
-    docker-compose                 \
-        -f docker-compose.yml      \
-        -f docker-compose.mock.yml \
-        up mock
+    make prototype-up
 ```
 
 ## Using with netcat
