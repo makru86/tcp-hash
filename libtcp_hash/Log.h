@@ -4,8 +4,8 @@
 #include <iostream>
 
 #define TCP_HASH_LOG_MESSAGE(severity, msg)                                    \
-  "[" << app::Log::micros_since_epoch() << "us] [" severity "] " << __FILE__   \
-      << ":" << __LINE__ << ": " << msg << std::endl
+  "[" << libtcp_hash::Log::micros_since_epoch() << "us] [" severity "] "       \
+      << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl
 
 #ifndef NDEBUG
 #define LOG_DEBUG(msg)                                                         \
