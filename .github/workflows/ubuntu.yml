@@ -22,7 +22,7 @@ jobs:
         run: docker-compose up
 
       - name: Coverage Docker Compose Up
-        run: env BUILD_LOAD_TESTS=OFF CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
+        run: env BUILD_UNIT_TESTS=ON BUILD_LOAD_TESTS=ON CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
       - name: Coverage gcno Files
         run: make coverage-report
       - name: Coverage Github Badge
