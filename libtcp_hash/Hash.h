@@ -61,37 +61,18 @@ class XxHash {
   static constexpr size_t seed_ = 0;
 
 public:
-  explicit XxHash() : xxCtx_(nullptr), xxHash_(seed_) { init(); }
+  explicit XxHash();
+  ~XxHash();
 
-  ~XxHash() { deinit(); }
+  // Add data to hash function
+  XxHash &feed(CharArray chunk);
 
-  XxHash &feed(CharArray chunk) {
-    if (XXH64_update(xxCtx_, chunk.data(), chunk.size()) == XXH_ERROR) {
-      throw std::runtime_error("XXH64_update() failed");
-    }
-    return *this;
-  }
-
-  HashValue digest() {
-    XXH64_hash_t const hash = XXH64_digest(xxCtx_);
-
-    // Self restart.
-    deinit();
-    init();
-    return hash;
-  }
+  // Return final hash, and prepare for next.
+  HashValue digest();
 
 private:
-  void init() {
-    xxCtx_ = XXH64_createState();
-    if (xxCtx_ == nullptr) {
-      throw std::runtime_error("XXH64_createState() failed");
-    }
-    if (XXH64_reset(xxCtx_, seed_) == XXH_ERROR) {
-      throw std::runtime_error("XXH64_reset() failed");
-    }
-  }
-  void deinit() { XXH64_freeState(xxCtx_); }
+  void init();
+  void deinit();
 };
 
 /*
@@ -108,21 +89,12 @@ enum class FsmState {
   Empty,
   Accumulating,
 };
-std::ostream &operator<<(std::ostream &os, FsmState state) {
-  switch (state) {
-  case FsmState::Empty:
-    os << "Empty";
-    break;
-  case FsmState::Accumulating:
-    os << "Accumulating";
-    break;
-  default:
-    os << "Unknown";
-    break;
-  };
-  return os;
-}
+std::ostream &operator<<(std::ostream &os, FsmState state);
 
+/*
+ * FSM:
+ * Adaptor on XxHash to work according to FSM rules.
+ */
 template <typename XxHashT> class FSM {
 
   XxHashT &xxHash_;
@@ -133,17 +105,21 @@ public:
 
   FSM &feed(CharArray chunk) {
     if (chunk.empty()) {
-      // Ignore empty chunk.
+
+      // Skip empty chunk.
       return *this;
     }
     switch (state_) {
     case FsmState::Empty:
+
       // Start accumulating.
       state_ = FsmState::Accumulating;
       xxHash_.feed(chunk);
       return *this;
     case FsmState::Accumulating:
     default:
+
+      // Continue accumulating.
       xxHash_.feed(chunk);
       return *this;
     };

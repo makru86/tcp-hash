@@ -1,6 +1,6 @@
 .PHONY: format-code loadtest coverage-report
 
-up: format-code
+up:
 	@echo "Building, testing, and starting service on 0.0.0.0:1234 in Docker..."
 	@docker-compose up builder --force-recreate --remove-orphans  --build
 

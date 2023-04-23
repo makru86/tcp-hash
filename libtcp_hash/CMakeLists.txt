@@ -1,19 +1,21 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(MyLib STATIC
-        TcpServer.cpp
-        SignalHandler.cpp
+add_library(libtcp_hash STATIC
+        Server.cpp
+        Server.h
         TcpHashClient.h
-        TcpServer.h
         Log.h
-        SignalHandler.h
         Hash.cpp
         Hash.h
         )
 
-target_link_libraries(MyLib PUBLIC
+target_link_libraries(libtcp_hash PUBLIC
         coverage_config
         Boost::system
         Threads::Threads
         xxHash::xxHash
+        )
+
+target_include_directories(libtcp_hash PUBLIC
+        "${CMAKE_SOURCE_DIR}"
         )

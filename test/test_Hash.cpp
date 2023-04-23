@@ -1,4 +1,4 @@
-#include "../src/lib/Hash.h"
+#include <libtcp_hash/Hash.h>
 #include <boost/test/unit_test.hpp>
 #include <iomanip>
 #include <list>

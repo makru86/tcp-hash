@@ -1,4 +1,4 @@
-#include "../src/lib/Log.h"
+#include <libtcp_hash/Log.h>
 #include <boost/test/unit_test.hpp>
 
 using app::Log;

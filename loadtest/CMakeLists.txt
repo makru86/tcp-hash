@@ -9,4 +9,5 @@ target_link_libraries(loadtest PRIVATE
         benchmark::benchmark
         benchmark::benchmark_main
         ${Boost_LIBRARIES}
+        libtcp_hash
         )

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Log.h"
+#include <libtcp_hash/Log.h>
 #include <boost/asio.hpp>
 #include <chrono>
 #include <iostream>
@@ -12,15 +12,15 @@ namespace app {
 
 using boost::asio::ip::tcp;
 
-class TcpServer {
+class SimpleTcpListener {
 
   boost::asio::io_context &io_context_;
   tcp::acceptor acceptor_;
   std::vector<std::thread> workers_;
 
 public:
-  TcpServer(boost::asio::io_context &io_context, const tcp::endpoint &endpoint,
-            std::size_t num_threads)
+  SimpleTcpListener(boost::asio::io_context &io_context,
+                    const tcp::endpoint &endpoint, std::size_t num_threads)
       : io_context_(io_context), acceptor_(io_context, endpoint) {
     LOG_DEBUG("Listen TCP endpoint: " << endpoint);
     LOG_DEBUG("Number of threads: " << num_threads);

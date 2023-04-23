@@ -6,10 +6,8 @@ function(create_test testname)
     )
 
     target_link_libraries(test_${testname} PRIVATE
-            MyLib
+            libtcp_hash
             ${Boost_LIBRARIES}
-            gtest
-            gmock
             )
 
     add_test(NAME test_${testname}
@@ -19,7 +17,6 @@ function(create_test testname)
 
 endfunction()
 
-create_test("TcpServer")
 create_test("Log")
-create_test("SignalHandler")
 create_test("Hash")
+create_test("Server")

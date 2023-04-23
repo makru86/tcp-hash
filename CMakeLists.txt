@@ -31,7 +31,8 @@ find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(xxHash REQUIRED)
 
-add_subdirectory(src)
+add_subdirectory(libtcp_hash)
+add_subdirectory(tcp_hash)
 
 if (BUILD_UNIT_TESTS)
     find_package(Boost REQUIRED COMPONENTS unit_test_framework)

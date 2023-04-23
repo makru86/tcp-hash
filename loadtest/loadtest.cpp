@@ -22,7 +22,7 @@
 >>> Message throughput: 3847402 msg/s
  */
 
-#include "../src/lib/TcpHashClient.h"
+#include <libtcp_hash/Server.h>
 #include <atomic>
 #include <benchmark/benchmark.h>
 #include <chrono>

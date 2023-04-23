@@ -2,10 +2,9 @@
 #include <boost/test/unit_test.hpp>
 #include <string>
 
-#include "../src/lib/TcpServer.h"
+#include <libtcp_hash/Server.h>
 
 using app::tcp;
-using app::TcpServer;
 
 BOOST_AUTO_TEST_CASE(test_handle_connection) {
   //    boost::asio::io_context io_context;
