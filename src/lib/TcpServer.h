@@ -1,14 +1,12 @@
 #pragma once
 
+#include "Log.h"
 #include <boost/asio.hpp>
-
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
-
-#include "Log.h"
 
 namespace app {
 

@@ -26,10 +26,15 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_link_options(coverage_config INTERFACE --coverage)
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+find_package(Threads REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(xxHash REQUIRED)
 
 add_subdirectory(src)
 
 if (BUILD_UNIT_TESTS)
+    find_package(Boost REQUIRED COMPONENTS unit_test_framework)
     enable_testing()
     add_subdirectory(test)
 endif()

@@ -1,6 +1,5 @@
-#include <boost/test/unit_test.hpp>
-
 #include "../src/lib/Log.h"
+#include <boost/test/unit_test.hpp>
 
 using app::Log;
 

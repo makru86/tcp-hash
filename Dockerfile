@@ -34,3 +34,9 @@ RUN apt-get update \
     clang-tidy \
     gcovr \
   && apt-get clean
+RUN cd /usr/src/googletest && \
+    cmake CMakeLists.txt && \
+    make install && \
+    mv lib/*.a /usr/lib && \
+    mv googletest/include/gtest /usr/include && \
+    mv googlemock/include/gmock /usr/include
