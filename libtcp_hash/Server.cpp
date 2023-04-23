@@ -1,3 +1,3 @@
 #include <libtcp_hash/Server.h>
 
-namespace app {}
+namespace libtcp_hash {}

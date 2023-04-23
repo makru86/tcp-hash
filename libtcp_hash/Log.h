@@ -20,7 +20,7 @@
 #define LOG_ERROR(msg)                                                         \
   { std::cerr << TCP_HASH_LOG_MESSAGE("ERROR", msg); }
 
-namespace app {
+namespace libtcp_hash {
 class Log {
 public:
   static size_t micros_since_epoch() {
@@ -30,4 +30,4 @@ public:
         .count();
   }
 };
-} // namespace app
+} // namespace libtcp_hash

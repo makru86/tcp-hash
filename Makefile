@@ -11,12 +11,12 @@ down:
 format-code:
 	@echo "Formatting code..."
 	@docker-compose run builder bash -c \
-		"find src test -name \*.cpp -or -name \*.h | xargs clang-format -i"
+		"find tcp_hash libtcp_hash test loadtest -name \*.cpp -or -name \*.h | xargs clang-format -i"
 
 tidy-code:
 	@echo "Running clang-tidy..."
 	@docker-compose run builder bash -c \
-		"find src test -name \*.cpp -or -name \*.h | head -1 | xargs clang-tidy -p build/ --export-fixes build/fixes.yaml --fix --fix-errors"
+		"find tcp_hash libtcp_hash test loadtest -name \*.cpp -or -name \*.h | head -1 | xargs clang-tidy -p build/ --export-fixes build/fixes.yaml --fix --fix-errors"
 
 loadtest:
 	@echo "Running loadtests..."

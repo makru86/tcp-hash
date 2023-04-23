@@ -1,9 +1,9 @@
-#include <libtcp_hash/Hash.h>
 #include <boost/test/unit_test.hpp>
 #include <iomanip>
+#include <libtcp_hash/Hash.h>
 #include <list>
 
-namespace app {
+namespace libtcp_hash {
 
 std::string hex(HashValue value) {
   std::stringstream ss;
@@ -79,7 +79,7 @@ struct MockXxHash {
 };
 
 BOOST_AUTO_TEST_CASE(FsmTest) {
-  using FSM = app::FSM<MockXxHash>;
+  using FSM = libtcp_hash::FSM<MockXxHash>;
 
   MockXxHash mockXxHash;
   FSM fsm{mockXxHash};
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(FsmTest) {
 }
 
 BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
-  using FSM = app::FSM<XxHash>;
+  using FSM = libtcp_hash::FSM<XxHash>;
 
   XxHash xxHash;
   FSM fsm{xxHash};
@@ -137,4 +137,4 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace app
+} // namespace libtcp_hash

@@ -1,7 +1,7 @@
-#include <libtcp_hash/Log.h>
 #include <boost/test/unit_test.hpp>
+#include <libtcp_hash/Log.h>
 
-using app::Log;
+using libtcp_hash::Log;
 
 static bool approximately_equal(size_t left, size_t rigth, size_t delta) {
   return (left >= rigth && left - rigth <= delta) ||

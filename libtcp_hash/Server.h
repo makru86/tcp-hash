@@ -1,14 +1,14 @@
 #pragma once
 
-#include <libtcp_hash/Log.h>
 #include <boost/asio.hpp>
 #include <chrono>
 #include <iostream>
+#include <libtcp_hash/Log.h>
 #include <string>
 #include <thread>
 #include <vector>
 
-namespace app {
+namespace libtcp_hash {
 
 using boost::asio::ip::tcp;
 
@@ -76,4 +76,4 @@ public:
   }
 };
 
-} // namespace app
+} // namespace libtcp_hash

@@ -4,7 +4,7 @@
 
 #include <libtcp_hash/Server.h>
 
-using app::tcp;
+using libtcp_hash::tcp;
 
 BOOST_AUTO_TEST_CASE(test_handle_connection) {
   //    boost::asio::io_context io_context;

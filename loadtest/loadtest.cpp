@@ -22,11 +22,11 @@
 >>> Message throughput: 3847402 msg/s
  */
 
-#include <libtcp_hash/Server.h>
 #include <atomic>
 #include <benchmark/benchmark.h>
 #include <chrono>
 #include <iostream>
+#include <libtcp_hash/Server.h>
 #include <vector>
 
 std::vector<uint8_t> message_to_send;
@@ -57,38 +57,38 @@ std::atomic<uint64_t> total_messages(0);
 
 static void loadtest(benchmark::State &state) {
 
-//  // Client parameters
-//  std::string address("localhost");
-//  int port = 1234;
-//  int connections_count = environment<int>("LOADTEST_CONNECTIONS", 100);
-//  int seconds_count = environment<int>("LOADTEST_SECONDS", 10);
-//
-//  std::cout << "Server address: " << address << std::endl;
-//  std::cout << "Server port: " << port << std::endl;
-//  std::cout << "Concurrent connections: " << connections_count << std::endl;
-//  std::cout << "Seconds to benchmarking: " << seconds_count << std::endl;
-//
-//  std::cout << std::endl;
-//
-//  // Create echo clients
-//  std::vector<app::TcpHashClient> clients;
-//  for (int i = 0; i < clients_count; ++i)
-//  {
-//    // Create echo client
-//    auto client = app::TcpH(service, address, port, messages_count);
-//    // client->SetupNoDelay(true);
-//    clients.emplace_back(client);
-//  }
-//
-//
-//  std::set<int> data;
-//  for (auto _ : state) {
-//    state.PauseTiming();
-//    data = app::ConstructRandomSet(state.range(0));
-//    state.ResumeTiming();
-//    for (int j = 0; j < state.range(1); ++j)
-//      data.insert(app::RandomNumber());
-//  }
+  //  // Client parameters
+  //  std::string address("localhost");
+  //  int port = 1234;
+  //  int connections_count = environment<int>("LOADTEST_CONNECTIONS", 100);
+  //  int seconds_count = environment<int>("LOADTEST_SECONDS", 10);
+  //
+  //  std::cout << "Server address: " << address << std::endl;
+  //  std::cout << "Server port: " << port << std::endl;
+  //  std::cout << "Concurrent connections: " << connections_count << std::endl;
+  //  std::cout << "Seconds to benchmarking: " << seconds_count << std::endl;
+  //
+  //  std::cout << std::endl;
+  //
+  //  // Create echo clients
+  //  std::vector<app::TcpHashClient> clients;
+  //  for (int i = 0; i < clients_count; ++i)
+  //  {
+  //    // Create echo client
+  //    auto client = app::TcpH(service, address, port, messages_count);
+  //    // client->SetupNoDelay(true);
+  //    clients.emplace_back(client);
+  //  }
+  //
+  //
+  //  std::set<int> data;
+  //  for (auto _ : state) {
+  //    state.PauseTiming();
+  //    data = app::ConstructRandomSet(state.range(0));
+  //    state.ResumeTiming();
+  //    for (int j = 0; j < state.range(1); ++j)
+  //      data.insert(app::RandomNumber());
+  //  }
 }
 
 BENCHMARK(loadtest)

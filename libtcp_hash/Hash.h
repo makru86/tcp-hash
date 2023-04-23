@@ -5,7 +5,7 @@
 #include <functional>
 #include <ostream>
 
-namespace app {
+namespace libtcp_hash {
 
 using CharArray = std::string_view;
 using Char = CharArray::value_type;
@@ -142,4 +142,4 @@ public:
   FsmState state() const { return state_; };
 };
 
-} // namespace app
+} // namespace libtcp_hash
