@@ -8,6 +8,8 @@ Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 - libboost-all-dev
 - libxxhash-dev
 
+Googletest was not used because Boost Unittest was already configured in this project's template (see [zethon/CCCBTemplate](https://github.com/zethon/CCCBTemplate)). And because this is a simple project, any unittesting framework works well.
+
 ## Building and running
 
 Checkout the code, create Docker container, build CMake project, run tests,
