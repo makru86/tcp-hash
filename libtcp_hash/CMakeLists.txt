@@ -5,7 +5,7 @@ add_library(libtcp_hash STATIC
         Server.h
         Hash.cpp
         Hash.h
-        Log.h
+        Util.h
         )
 
 target_link_libraries(libtcp_hash PUBLIC

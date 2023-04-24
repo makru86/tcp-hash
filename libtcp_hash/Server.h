@@ -9,7 +9,7 @@
 #include <boost/asio.hpp>
 #include <chrono>
 #include <iostream>
-#include <libtcp_hash/Log.h>
+#include <libtcp_hash/Util.h>
 #include <string>
 #include <thread>
 #include <vector>

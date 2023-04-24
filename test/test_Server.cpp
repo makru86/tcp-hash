@@ -10,7 +10,7 @@ using namespace std::chrono_literals;
 using namespace boost::asio;
 namespace libtcp_hash {
 
-BOOST_AUTO_TEST_SUITE(ServerTests)
+BOOST_AUTO_TEST_SUITE(ServerTests, TEST_TIMEOUT_SECS(16))
 
 BOOST_AUTO_TEST_CASE(ClientTest) {
   LOG_DEBUG(std::filesystem::current_path().c_str());

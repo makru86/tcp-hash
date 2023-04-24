@@ -17,6 +17,6 @@ function(create_test testname)
 
 endfunction()
 
-create_test("Log")
+create_test("Util")
 create_test("Hash")
 create_test("Server")
