@@ -4,15 +4,14 @@
 #include <iostream>
 #include <libtcp_hash/Server.h>
 
-using libtcp_hash::tcp;
+using namespace libtcp_hash;
 
 int main() {
 
-  boost::asio::io_context io_context;
-  tcp::endpoint endpoint(tcp::v4(), 1234);
+  io_context io_context;
+  ip::tcp::endpoint endpoint(tcp::v4(), 1234);
 
-  libtcp_hash::SimpleTcpListener server(io_context, endpoint,
-                                        std::thread::hardware_concurrency());
+  SimpleTcpListener server(io_context, endpoint));
   server.start();
 
   io_context.run();

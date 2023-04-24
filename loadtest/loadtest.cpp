@@ -29,6 +29,9 @@
 #include <libtcp_hash/Server.h>
 #include <vector>
 
+using namespace libtcp_hash;
+namespace {
+
 std::vector<uint8_t> message_to_send;
 
 uint64_t nanoSinceEpoch() {
@@ -90,6 +93,8 @@ static void loadtest(benchmark::State &state) {
   //      data.insert(app::RandomNumber());
   //  }
 }
+
+} // namespace
 
 BENCHMARK(loadtest)
     ->Args({1 << 8, 128})

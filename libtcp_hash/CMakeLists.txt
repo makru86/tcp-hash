@@ -3,10 +3,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(libtcp_hash STATIC
         Server.cpp
         Server.h
-        TcpHashClient.h
-        Log.h
         Hash.cpp
         Hash.h
+        Log.h
         )
 
 target_link_libraries(libtcp_hash PUBLIC
