@@ -2,7 +2,7 @@
  * Session and SimpleTcpListener are inspired by Boost Asio example
  * async_tcp_echo_server.cpp:
  * https://www.boost.org/doc/libs/1_54_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp
-*/
+ */
 
 #pragma once
 
