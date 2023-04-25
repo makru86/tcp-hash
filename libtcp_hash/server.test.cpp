@@ -16,22 +16,11 @@ BOOST_AUTO_TEST_CASE(ServerClientTest) {
   io_service io;
   ip::tcp::endpoint tcpAddress{ip::tcp::v4(), 1234};
   SimpleTcpListener server{io, tcpAddress};
+  TcpHashClient client{io, tcpAddress};
 
   std::thread ioThread{[&]() { io.run(); }};
-
-  TcpHashClient client{io, tcpAddress};
   BOOST_TEST("echo Hello" == client.request("echo Hello\n"));
 
-  io.stop();
-
-  //  for (;;) {
-  //    std::cout << "Commands:\n q: stop server\n> ";
-  //    if (std::getchar() == 'q') {
-  //      io_service.stop();
-  //      break;
-  //    }
-  //  }
-  //  io_service.stop();
   ioThread.join();
   LOG_DEBUG("server terminated");
 }

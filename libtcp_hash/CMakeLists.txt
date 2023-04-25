@@ -1,15 +1,13 @@
-add_library(libtcp_hash STATIC hash.cpp hash.h server.cpp server.h util.h)
-
+add_library(libtcp_hash STATIC hash.cpp hash.h server.cpp server.h util.h util.cpp)
+target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
         Threads::Threads
         coverage_config
         xxHash::xxHash)
 
-target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
-
 function(create_test testname)
-    add_executable(test_${testname} main.test.cpp ${testname}.test.cpp )
+    add_executable(test_${testname} main.test.cpp ${testname}.test.cpp)
     target_link_libraries(test_${testname} PRIVATE
             libtcp_hash
             ${Boost_LIBRARIES})

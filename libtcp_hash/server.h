@@ -17,15 +17,13 @@
 
 namespace libtcp_hash {
 
-using namespace boost::asio;
-
 class Session : public std::enable_shared_from_this<Session> {
-  ip::tcp::socket socket_;
+  boost::asio::ip::tcp::socket socket_;
   enum { max_length = 1024 };
   char data_[max_length];
 
 public:
-  Session(ip::tcp::socket socket) : socket_(std::move(socket)) {}
+  Session(boost::asio::ip::tcp::socket socket) : socket_(std::move(socket)) {}
 
   void start() { do_read(); }
 
@@ -33,7 +31,7 @@ private:
   void do_read() {
     auto self(shared_from_this());
     socket_.async_read_some(
-        buffer(data_, max_length),
+        boost::asio::buffer(data_, max_length),
         [this, self](boost::system::error_code ec, std::size_t length) {
           if (!ec) {
             do_write(length);
@@ -44,7 +42,7 @@ private:
   void do_write(std::size_t length) {
     auto self(shared_from_this());
     async_write(
-        socket_, buffer(data_, length),
+        socket_, boost::asio::buffer(data_, length),
         [this, self](boost::system::error_code ec, std::size_t /*length*/) {
           if (!ec) {
             do_read();
@@ -66,12 +64,13 @@ private:
 
 class SimpleTcpListener {
 
-  io_service &io_;
-  ip::tcp::acceptor acceptor_;
-  ip::tcp::socket socket_;
+  boost::asio::io_service &io_;
+  boost::asio::ip::tcp::acceptor acceptor_;
+  boost::asio::ip::tcp::socket socket_;
 
 public:
-  SimpleTcpListener(io_context &io, const ip::tcp::endpoint &endpoint)
+  SimpleTcpListener(boost::asio::io_context &io,
+                    const boost::asio::ip::tcp::endpoint &endpoint)
       : io_{io}, acceptor_(io_, endpoint), socket_(io_) {
     do_accept();
   }
@@ -95,23 +94,24 @@ private:
  */
 class TcpHashClient {
 
-  io_context &io_;
-  ip::tcp::socket socket_;
+  boost::asio::io_context &io_;
+  boost::asio::ip::tcp::socket socket_;
 
 public:
-  TcpHashClient(io_context &io, ip::tcp::endpoint const &endpoint)
+  TcpHashClient(boost::asio::io_context &io,
+                boost::asio::ip::tcp::endpoint const &endpoint)
       : io_{io}, socket_(io_) {
-    ip::tcp::resolver dns{io_};
+    boost::asio::ip::tcp::resolver dns{io_};
     connect(socket_, dns.resolve(endpoint));
   }
 
   [[nodiscard]] bool connected() const { return socket_.is_open(); }
 
   std::string request(const std::string &request) {
-    write(socket_, buffer(request));
+    write(socket_, boost::asio::buffer(request));
 
-    streambuf response;
-    read_until(socket_, response, "\n");
+    boost::asio::streambuf response;
+    boost::asio::read_until(socket_, response, "\n");
 
     std::istream response_stream(&response);
     std::string response_str;

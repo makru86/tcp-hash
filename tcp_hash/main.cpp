@@ -5,20 +5,12 @@
 #include <libtcp_hash/server.h>
 
 using namespace libtcp_hash;
+using namespace boost::asio;
 
 int main() {
-
-  io_context io;
+  io_service io;
   ip::tcp::endpoint endpoint(ip::tcp::v4(), 1234);
-
   signal_set signals(io, SIGINT, SIGTERM);
   signals.async_wait([&](auto, auto) { io.stop(); });
-
-  //  SimpleTcpListener server(io_context, endpoint));
-  //  server.start();
-  //
-  //  io_context.run();
-  //
-  //  server.stop();
   return 0;
 }

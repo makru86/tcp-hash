@@ -26,77 +26,79 @@
 #include <benchmark/benchmark.h>
 #include <chrono>
 #include <iostream>
+#include <libtcp_hash/hash.h>
 #include <libtcp_hash/server.h>
+#include <libtcp_hash/util.h>
 #include <vector>
 
 using namespace libtcp_hash;
+using namespace boost::asio;
 namespace {
 
-std::vector<uint8_t> message_to_send;
+/*
+ * Metrics: loadtest metrics.
+ */
+struct Metrics {
+  std::atomic<uint64_t> timestampStart{nanoSinceEpoch()};
+  std::atomic<uint64_t> timestampStop{nanoSinceEpoch()};
+  std::atomic<uint64_t> totalErrors{0};
+  std::atomic<uint64_t> totalBytes{0};
+  std::atomic<uint64_t> totalMessages{0};
+};
 
-uint64_t nanoSinceEpoch() {
-  using namespace std::chrono;
-  auto now = high_resolution_clock::now().time_since_epoch();
-  return duration_cast<duration<uint64_t>>(now).count();
+/*
+ * Config: loadtest configuration parameters.
+ */
+struct Config {
+  int concurrentConnections_{getEnvOrValue("LOADTEST_CONNECTIONS", 100)};
+  int testingTime_{getEnvOrValue("LOADTEST_SECONDS", 10)};
+  ip::tcp::endpoint tcpAddress_{ip::tcp::v4(), 1234};
+};
+std::ostream &operator<<(std::ostream &os, const Config &config) {
+  return os << "loadtest configuration:"
+            << "\n Concurrent client connections: "
+            << config.concurrentConnections_
+            << "\n Testing time: " << config.testingTime_ << " seconds"
+            << "\n Server TCP address" << config.tcpAddress_ << "\n";
 }
 
-template <typename T> T environment(const std::string &name, const T &def) {
-  const char *value = std::getenv(name.c_str());
-  if (std::is_same<T, std::string>::value) {
-    return value ? value : def;
+Config testConfig{};
+Metrics testMetrics{};
+std::vector<uint8_t> messageToSend;
+
+/*
+ * serverLoadtest():
+ * Benchmarking function for the server.
+ */
+void serverLoadtest(benchmark::State &bench) {
+  LOG_DEBUG("Test setup started");
+  LOG_DEBUG("Test config: " << testConfig);
+  io_service io;
+  SimpleTcpListener server{io, testConfig.tcpAddress_};
+  std::vector<TcpHashClient> clients;
+  for (int i = 0; i < testConfig.concurrentConnections_; ++i) {
+    clients.emplace_back(TcpHashClient{io, testConfig.tcpAddress_});
   }
-  if (std::is_same<T, int>::value) {
-    return value ? std::stoi(value) : def;
+  std::thread ioThread{[&]() { io.run(); }};
+  LOG_DEBUG("Test setup completed");
+
+  // test
+  for (auto _ : bench) {
+    bench.PauseTiming();
+    bench.ResumeTiming();
+    for (int i = 0; i != bench.range(1); ++i)
+      clients[1].request("echo Hello\n");
   }
-  return value ? value : def;
-}
 
-std::atomic<uint64_t> timestamp_start(nanoSinceEpoch());
-std::atomic<uint64_t> timestamp_stop(nanoSinceEpoch());
-
-std::atomic<uint64_t> total_errors(0);
-std::atomic<uint64_t> total_bytes(0);
-std::atomic<uint64_t> total_messages(0);
-
-static void loadtest(benchmark::State &state) {
-
-  //  // Client parameters
-  //  std::string address("localhost");
-  //  int port = 1234;
-  //  int connections_count = environment<int>("LOADTEST_CONNECTIONS", 100);
-  //  int seconds_count = environment<int>("LOADTEST_SECONDS", 10);
-  //
-  //  std::cout << "Server address: " << address << std::endl;
-  //  std::cout << "Server port: " << port << std::endl;
-  //  std::cout << "Concurrent connections: " << connections_count << std::endl;
-  //  std::cout << "Seconds to benchmarking: " << seconds_count << std::endl;
-  //
-  //  std::cout << std::endl;
-  //
-  //  // Create echo clients
-  //  std::vector<app::TcpHashClient> clients;
-  //  for (int i = 0; i < clients_count; ++i)
-  //  {
-  //    // Create echo client
-  //    auto client = app::TcpH(service, address, port, messages_count);
-  //    // client->SetupNoDelay(true);
-  //    clients.emplace_back(client);
-  //  }
-  //
-  //
-  //  std::set<int> data;
-  //  for (auto _ : state) {
-  //    state.PauseTiming();
-  //    data = app::ConstructRandomSet(state.range(0));
-  //    state.ResumeTiming();
-  //    for (int j = 0; j < state.range(1); ++j)
-  //      data.insert(app::RandomNumber());
-  //  }
+  LOG_DEBUG("Test teardown started");
+  io.stop();
+  ioThread.join();
+  LOG_DEBUG("Test teardown completed");
 }
 
 } // namespace
 
-BENCHMARK(loadtest)
+BENCHMARK(serverLoadtest)
     ->Args({1 << 8, 128})
     ->Args({2 << 8, 128})
     ->Args({1 << 8, 512})
