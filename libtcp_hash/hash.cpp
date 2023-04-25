@@ -1,4 +1,4 @@
-#include "Hash.h"
+#include "hash.h"
 
 libtcp_hash::XxHash::XxHash() : xxCtx_(nullptr), xxHash_(seed_) { init(); }
 libtcp_hash::XxHash::~XxHash() { deinit(); }

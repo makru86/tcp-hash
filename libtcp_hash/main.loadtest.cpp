@@ -26,7 +26,7 @@
 #include <benchmark/benchmark.h>
 #include <chrono>
 #include <iostream>
-#include <libtcp_hash/Server.h>
+#include <libtcp_hash/server.h>
 #include <vector>
 
 using namespace libtcp_hash;

@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <iomanip>
-#include <libtcp_hash/Hash.h>
+#include <libtcp_hash/hash.h>
 #include <list>
 
 namespace libtcp_hash {

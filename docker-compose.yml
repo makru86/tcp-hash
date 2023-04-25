@@ -15,11 +15,11 @@ services:
       - -c
       - |
         ./tools/check_code_format.sh
-        cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Debug} -DBUILD_UNIT_TESTS={BUILD_UNIT_TESTS:-ON} -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-ON} -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
+        cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Debug} -DBUILD_UNIT_TESTS=${BUILD_UNIT_TESTS:-ON} -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-ON} -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
         cmake --build build --target all -- -j4
-        cd build
+        cd build/libtcp_hash
         ctest
-        ./loadtest/loadtest
+        ./loadtest
 
 volumes:
 

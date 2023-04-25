@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <chrono>
 #include <filesystem>
-#include <libtcp_hash/Server.h>
+#include <libtcp_hash/server.h>
 #include <thread>
 
 using namespace std::chrono_literals;
@@ -12,36 +12,17 @@ namespace libtcp_hash {
 
 BOOST_AUTO_TEST_SUITE(ServerTests, TEST_TIMEOUT_SECS(16))
 
-BOOST_AUTO_TEST_CASE(ClientTest) {
-  LOG_DEBUG(std::filesystem::current_path().c_str());
-  io_context ioContext;
+BOOST_AUTO_TEST_CASE(ServerClientTest) {
+  io_service io;
+  ip::tcp::endpoint tcpAddress{ip::tcp::v4(), 1234};
+  SimpleTcpListener server{io, tcpAddress};
 
-  boost::process::child server{"../../prototype/tcp_hash.sh 4321"};
-  LOG_DEBUG("server started on port 4321");
+  std::thread ioThread{[&]() { io.run(); }};
 
-  //  boost::process::async_system(
-  //      ioContext,
-  //      [](int exit_code, const std::error_code &ec) {
-  //        std::cout << "hello world, I exited with " << exit_code <<
-  //        std::endl;
-  //      },
-  //      "../../prototype/tcp_hash.sh");
+  TcpHashClient client{io, tcpAddress};
+  BOOST_TEST("echo Hello" == client.request("echo Hello\n"));
 
-  std::this_thread::sleep_for(5s);
-  server.terminate();
-  server.wait();
-  LOG_DEBUG("server terminated with code " << server.exit_code());
-}
-
-BOOST_AUTO_TEST_CASE(ServerTest) {
-  io_service io_service;
-  SimpleTcpListener server(io_service, ip::tcp::endpoint(ip::tcp::v4(), 1234));
-
-  signal_set signals(io_service, SIGINT, SIGTERM);
-  signals.async_wait([&](auto, auto) { io_service.stop(); });
-
-  LOG_DEBUG("Running...")
-  std::thread server_thread{[&]() { io_service.run_for(1s); }};
+  io.stop();
 
   //  for (;;) {
   //    std::cout << "Commands:\n q: stop server\n> ";
@@ -51,7 +32,7 @@ BOOST_AUTO_TEST_CASE(ServerTest) {
   //    }
   //  }
   //  io_service.stop();
-  server_thread.join();
+  ioThread.join();
   LOG_DEBUG("server terminated");
 }
 

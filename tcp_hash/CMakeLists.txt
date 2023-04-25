@@ -1,8 +1,2 @@
-add_executable("${CMAKE_PROJECT_NAME}"
-        main.cpp
-)
-
-target_link_libraries("${CMAKE_PROJECT_NAME}"
-    PUBLIC
-        libtcp_hash
-)
+add_executable(tcp_hash main.cpp)
+target_link_libraries(tcp_hash PUBLIC libtcp_hash)

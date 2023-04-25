@@ -7,9 +7,10 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <chrono>
 #include <iostream>
-#include <libtcp_hash/Util.h>
+#include <libtcp_hash/util.h>
 #include <string>
 #include <thread>
 #include <vector>
@@ -64,12 +65,14 @@ private:
 //                     socket.set_option(socket_base::receive_buffer_size(65536));
 
 class SimpleTcpListener {
+
+  io_service &io_;
   ip::tcp::acceptor acceptor_;
   ip::tcp::socket socket_;
 
 public:
-  SimpleTcpListener(io_context &io_context, const ip::tcp::endpoint &endpoint)
-      : acceptor_(io_context, endpoint), socket_(io_context) {
+  SimpleTcpListener(io_context &io, const ip::tcp::endpoint &endpoint)
+      : io_{io}, acceptor_(io_, endpoint), socket_(io_) {
     do_accept();
   }
 
@@ -91,14 +94,15 @@ private:
  *  pipelining - don't wait response before sending next request
  */
 class TcpHashClient {
-  io_context io_context_;
-  ip::tcp::resolver resolver_;
+
+  io_context &io_;
   ip::tcp::socket socket_;
 
 public:
-  TcpHashClient(std::string_view address, std::string_view port)
-      : resolver_(io_context_), socket_(io_context_) {
-    connect(socket_, resolver_.resolve(address, port));
+  TcpHashClient(io_context &io, ip::tcp::endpoint const &endpoint)
+      : io_{io}, socket_(io_) {
+    ip::tcp::resolver dns{io_};
+    connect(socket_, dns.resolve(endpoint));
   }
 
   [[nodiscard]] bool connected() const { return socket_.is_open(); }
