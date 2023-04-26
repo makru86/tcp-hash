@@ -14,17 +14,40 @@ services:
       - bash
       - -c
       - >
-        ./tools/check_code_format.sh
+        echo Checking code formatting...
+        && ./tools/check_code_format.sh
+        &&
+        echo Configuring CMake project ${BUILD_TYPE:-Debug}...
         && cmake -B build -S .
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Debug}
         -DBUILD_UNIT_TESTS=${BUILD_UNIT_TESTS:-ON}
+        -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-OFF}
+        -DCODE_COVERAGE=${CODE_COVERAGE:-ON}
+        &&
+        echo Building project ${BUILD_TYPE:-Debug}...
+        && cmake --build build --target all -- -j4
+        &&
+        echo Running unit tests...
+        && cd build/libtcp_hash && ctest -VV && cd ../..
+        &&
+        echo Configuring CMake project Release...
+        && rm -rf build
+        && cmake -B build -S .
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DBUILD_UNIT_TESTS=${BUILD_UNIT_TESTS:-OFF}
         -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-ON}
         -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
+        &&
+        echo Building project Release...
         && cmake --build build --target all -- -j4
-        && cd build/libtcp_hash
-        && ctest
-        && ./loadtest
+        &&
+        echo Running benchmark...
+        && ./build/libtcp_hash/loadtest
+        &&
+        echo Starting tcp_hash...
+        && echo TODO
 
 volumes:
 

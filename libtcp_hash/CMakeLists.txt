@@ -1,4 +1,4 @@
-add_library(libtcp_hash STATIC hash.cpp hash.h server.cpp server.h util.h util.cpp)
+add_library(libtcp_hash STATIC hash.cpp hash.h server.cpp server.h util.cpp util.h)
 target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
@@ -26,7 +26,7 @@ endif ()
 
 if (BUILD_LOAD_TESTS)
     find_package(benchmark REQUIRED)
-    add_executable(loadtest main.loadtest.cpp)
+    add_executable(loadtest main.loadtest.cpp hash.loadtest.cpp server.loadtest.cpp)
     target_link_libraries(loadtest PRIVATE
             benchmark::benchmark
             benchmark::benchmark_main

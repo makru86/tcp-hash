@@ -21,6 +21,7 @@ BOOST_AUTO_TEST_CASE(ServerClientTest) {
   std::thread ioThread{[&]() { io.run(); }};
   BOOST_TEST("echo Hello" == client.request("echo Hello\n"));
 
+  io.stop();
   ioThread.join();
   LOG_DEBUG("server terminated");
 }

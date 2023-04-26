@@ -1,15 +1,10 @@
 #include <boost/test/unit_test.hpp>
 #include <iomanip>
 #include <libtcp_hash/hash.h>
+#include <libtcp_hash/util.h>
 #include <list>
 
 namespace libtcp_hash {
-
-std::string hex(HashValue value) {
-  std::stringstream ss;
-  ss << std::setfill('0') << std::setw(16) << std::hex << value;
-  return ss.str();
-}
 
 struct OnChunkCbArgs {
   CharArray charArray_;
@@ -58,12 +53,12 @@ BOOST_AUTO_TEST_CASE(XxHashTest) {
   XxHash xxHash;
 
   // Same input - same result:
-  BOOST_TEST(hex(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
-  BOOST_TEST(hex(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
+  BOOST_TEST(hexen(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
+  BOOST_TEST(hexen(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
 
   // Empty input:
-  BOOST_TEST(hex(xxHash.digest()) == "ef46db3751d8e999");
-  BOOST_TEST(hex(xxHash.feed("").digest()) == "ef46db3751d8e999");
+  BOOST_TEST(hexen(xxHash.digest()) == "ef46db3751d8e999");
+  BOOST_TEST(hexen(xxHash.feed("").digest()) == "ef46db3751d8e999");
 }
 
 struct MockXxHash {

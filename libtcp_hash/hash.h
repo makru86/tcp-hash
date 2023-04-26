@@ -54,10 +54,8 @@ void tokenizer(CharArray input, OnChunkCb onChunkCb) {
  * function.
  */
 class XxHash {
-
   XXH64_state_t *xxCtx_;
   XXH64_hash_t xxHash_;
-
   static constexpr size_t seed_ = 0;
 
 public:
@@ -96,7 +94,6 @@ std::ostream &operator<<(std::ostream &os, FsmState state);
  * Adaptor on XxHash to work according to FSM rules.
  */
 template <typename XxHashT> class FSM {
-
   XxHashT &xxHash_;
   FsmState state_ = FsmState::Empty;
 
@@ -105,21 +102,16 @@ public:
 
   FSM &feed(CharArray chunk) {
     if (chunk.empty()) {
-
       // Skip empty chunk.
       return *this;
     }
     switch (state_) {
     case FsmState::Empty:
-
-      // Start accumulating.
       state_ = FsmState::Accumulating;
       xxHash_.feed(chunk);
       return *this;
     case FsmState::Accumulating:
     default:
-
-      // Continue accumulating.
       xxHash_.feed(chunk);
       return *this;
     };
@@ -128,13 +120,10 @@ public:
   HashValue digest() {
     switch (state_) {
     case FsmState::Empty:
-      // Ignore empty chunk.
-      return 0;
+      return 0; //< Ignore empty chunk.
     case FsmState::Accumulating:
     default:
-      // Stop accumulating.
       state_ = FsmState::Empty;
-      // Process accumulated chunk.
       return xxHash_.digest();
     };
   }
