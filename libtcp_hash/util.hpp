@@ -12,10 +12,10 @@
 #define TCP_HASH_LOG_MESSAGE(severity, msg)                                    \
   libtcp_hash::fixedFilledWidth(std::to_string(libtcp_hash::nanoSinceEpoch()), \
                                 10, '0')                                       \
-      << " " severity " .."                                                    \
+      << "_us " severity " tid_" << std::this_thread::get_id() << " .."        \
       << libtcp_hash::fixedFilledWidth(__FILE__, 16, ' ') << ":"               \
       << libtcp_hash::fixedFilledWidth(std::to_string(__LINE__), 3, '0')       \
-      << ": " << msg << std::endl
+      << " " << msg << std::endl
 
 /* LOG_DEBUG():
  * Enabled only for DEBUG build configuration.
@@ -61,7 +61,7 @@ int getEnvOrValue(const std::string &envName, int orValue);
  * Loadtest configuration parameters.
  */
 struct LoadtestConfig {
-  int connections{getEnvOrValue("LOADTEST_CONNECTIONS", 8)};
+  int clientSessions{getEnvOrValue("LOADTEST_CLIENT_SESSIONS", 8)};
   int testingTime_{getEnvOrValue("LOADTEST_SECONDS", 10)};
   size_t dataSize{10 * 1024 * 1024};
   int repeatDataIterations{100};
@@ -124,6 +124,16 @@ std::string hexen(uint64_t value);
  * uniform distribution.
  * */
 std::string randomString(size_t length, unsigned int seed);
+
+/* weakPtrDebugInfo():
+ */
+template <typename T> std::string weakPtrDebugInfo(std::weak_ptr<T> weakPtr) {
+  std::stringstream ss;
+  ss << "[this:" << weakPtr.get() << " use_count:" << weakPtr.use_count()
+     << "] ";
+  return ss.str();
+}
+
 
 std::ostream &operator<<(std::ostream &os, LoadtestConfig const &value);
 std::ostream &operator<<(std::ostream &os, LoadtestMetrics const &value);

@@ -1,7 +1,7 @@
 #include <iostream>
-#include <libtcp_hash/hash.h>
-#include <libtcp_hash/server.h>
-#include <libtcp_hash/util.h>
+#include <libtcp_hash/hash.hpp>
+#include <libtcp_hash/server.hpp>
+#include <libtcp_hash/util.hpp>
 #include <thread>
 #include <vector>
 
@@ -18,11 +18,21 @@ void serverLoadtest() {
   LoadtestMetrics testMetrics;
   const auto inputData{
       randomString(testConfig.dataSize, testConfig.randomGeneratorSeed)};
+  io_service serverIo;
+  EchoProtocol echoHandler;
+  SimpleTcpListener server{serverIo, testConfig.tcpAddress, echoHandler};
+  std::thread serverThread{[&]() { serverIo.run(); }};
+  io_service clientIo;
+  TcpHashClient client{clientIo, testConfig.tcpAddress};
   LOG_INFO("Test config:  " << testConfig);
 
   // Test
   testMetrics.timestampStart = nanoSinceEpoch();
+  auto response{client.request("repeat\nrepeat\n")};
+  LOG_INFO("Response: " << response);
   testMetrics.timestampStop = nanoSinceEpoch();
+  serverIo.stop();
+  serverThread.join();
 
   // Report
   auto analyzed{analyzeMetrics(testMetrics)};

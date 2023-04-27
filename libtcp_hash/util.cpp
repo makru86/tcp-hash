@@ -1,4 +1,4 @@
-#include <libtcp_hash/util.h>
+#include <libtcp_hash/util.hpp>
 #include <random>
 
 namespace libtcp_hash {
@@ -71,7 +71,7 @@ std::string randomString(size_t length, unsigned int seed) {
 std::ostream &operator<<(std::ostream &os, LoadtestConfig const &value) {
   return os << "LoadtestConfig:"
             << "\n Server TCP address:  " << value.tcpAddress
-            << "\n Xonnections count:   " << value.connections
+            << "\n Xonnections count:   " << value.clientSessions
             << "\n Data size:           " << value.dataSize
             << "\n Repeat count:        " << value.repeatDataIterations
             << "\n RNG seed:            " << value.randomGeneratorSeed << "\n";

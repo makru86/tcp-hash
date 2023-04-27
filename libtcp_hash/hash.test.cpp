@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <iomanip>
-#include <libtcp_hash/hash.h>
-#include <libtcp_hash/util.h>
+#include <libtcp_hash/hash.hpp>
+#include <libtcp_hash/util.hpp>
 #include <list>
 
 namespace libtcp_hash {
@@ -61,20 +61,25 @@ BOOST_AUTO_TEST_CASE(XxHashTest) {
   BOOST_TEST(hexen(xxHash.feed("").digest()) == "ef46db3751d8e999");
 }
 
-struct MockXxHash {
+class MockXxHash {
+public:
   CharArray feedArg_;
   HashValue digestReturn_;
+
+  MockXxHash() noexcept = default;
+  ~MockXxHash() = default;
+  MockXxHash(const MockXxHash &) = delete;
+  MockXxHash &operator=(const MockXxHash &) = delete;
 
   MockXxHash &feed(CharArray chunk) {
     BOOST_TEST(chunk == feedArg_);
     return *this;
   }
-
-  HashValue digest() { return digestReturn_; }
+  HashValue digest() const { return digestReturn_; }
 };
 
 BOOST_AUTO_TEST_CASE(FsmTest) {
-  using FSM = libtcp_hash::FSM<MockXxHash>;
+  using FSM = libtcp_hash::StatefulHasher<MockXxHash>;
 
   MockXxHash mockXxHash;
   FSM fsm{mockXxHash};
@@ -98,7 +103,7 @@ BOOST_AUTO_TEST_CASE(FsmTest) {
 }
 
 BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
-  using FSM = libtcp_hash::FSM<XxHash>;
+  using FSM = libtcp_hash::StatefulHasher<XxHash>;
 
   XxHash xxHash;
   FSM fsm{xxHash};

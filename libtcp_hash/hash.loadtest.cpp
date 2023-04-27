@@ -1,6 +1,6 @@
 #include <iostream>
-#include <libtcp_hash/hash.h>
-#include <libtcp_hash/util.h>
+#include <libtcp_hash/hash.hpp>
+#include <libtcp_hash/util.hpp>
 #include <thread>
 #include <vector>
 
@@ -21,13 +21,13 @@ void hashLoadtest() {
 
   // Test
   testMetrics.timestampStart = nanoSinceEpoch();
-  // For each connection...
-  for (auto tid{0}; tid != testConfig.connections; ++tid) {
+  // For each session...
+  for (auto tid{0}; tid != testConfig.clientSessions; ++tid) {
     // create a thread that...
     threads.emplace_back([&]() {
       // will setup once...
       XxHash xxHash{};
-      FSM<XxHash> fsm{xxHash};
+      StatefulHasher<XxHash> fsm{xxHash};
       // and for the given number of iterations will repeatedly...
       for (auto i{0}; i != testConfig.repeatDataIterations; ++i) {
         // call the tokenizer with the input data...
@@ -48,7 +48,7 @@ void hashLoadtest() {
       }
     });
   }
-  for (auto i{0}; i != testConfig.connections; ++i) {
+  for (auto i{0}; i != testConfig.clientSessions; ++i) {
     threads[i].join();
   }
   testMetrics.timestampStop = nanoSinceEpoch();

@@ -10,50 +10,46 @@
 #include <boost/asio/executor_work_guard.hpp>
 #include <chrono>
 #include <iostream>
-#include <libtcp_hash/util.h>
+#include <libtcp_hash/util.hpp>
 #include <string>
 #include <thread>
 #include <vector>
 
 namespace libtcp_hash {
 
-class Session : public std::enable_shared_from_this<Session> {
-  boost::asio::ip::tcp::socket socket_;
-  enum { max_length = 1024 };
-  char data_[max_length];
-
-public:
-  Session(boost::asio::ip::tcp::socket socket) : socket_(std::move(socket)) {}
-
-  void start() { do_read(); }
-
-private:
-  void do_read() {
-    auto self(shared_from_this());
-    socket_.async_read_some(
-        boost::asio::buffer(data_, max_length),
-        [this, self](boost::system::error_code ec, std::size_t length) {
-          if (!ec) {
-            do_write(length);
-          }
-        });
-  }
-
-  void do_write(std::size_t length) {
-    auto self(shared_from_this());
-    async_write(
-        socket_, boost::asio::buffer(data_, length),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-          if (!ec) {
-            do_read();
-          }
-        });
+// template <typename SendMessageCb>
+struct EchoProtocol {
+  using SendMessageCb = std::function<void(std::string_view)>;
+  static void onMessageReceived(std::string_view message,
+                         SendMessageCb sendMessageCb) {
+    sendMessageCb(message);
   }
 };
 
-// LOG_DEBUG("listening TCPv4 address: " << endpoint);
+template <typename Protocol>
+class Session : public std::enable_shared_from_this<Session<Protocol>> {
+
+  /*
+  % cat /proc/sys/net/ipv4/tcp_wmem
+  4096	16384	4194304
+  % cat /proc/sys/net/ipv4/tcp_rmem
+  4096	131072	6291456
+   */
+  static constexpr size_t bufferSize_{8192};
+  char buffer_[bufferSize_];
+  boost::asio::ip::tcp::socket socket_;
+  Protocol handler_;
+
+public:
+  Session(boost::asio::ip::tcp::socket socket, Protocol handler);
+  ~Session();
+
+  void start() { receiveMessage(); }
+  void receiveMessage();
+  void sendMessage(std::string_view message);
+};
+
 // LOG_DEBUG("number of threads: " << num_threads);
-// LOG_DEBUG("new TCP connection from: " << socket.remote_endpoint());
 // LOG_DEBUG("bytes received: " << data);
 // LOG_DEBUG("response sent");
 // LOG_ERROR("Exception in thread: " << e.what());
@@ -62,16 +58,19 @@ private:
 //                     socket.set_option(socket_base::send_buffer_size(65536));
 //                     socket.set_option(socket_base::receive_buffer_size(65536));
 
-class SimpleTcpListener {
+template <typename Handler> class SimpleTcpListener {
 
   boost::asio::io_service &io_;
   boost::asio::ip::tcp::acceptor acceptor_;
   boost::asio::ip::tcp::socket socket_;
+  Handler handler_;
 
 public:
   SimpleTcpListener(boost::asio::io_context &io,
-                    const boost::asio::ip::tcp::endpoint &endpoint)
-      : io_{io}, acceptor_(io_, endpoint), socket_(io_) {
+                    const boost::asio::ip::tcp::endpoint &endpoint,
+                    Handler handler)
+      : io_{io}, acceptor_(io_, endpoint), socket_(io_), handler_{handler} {
+    LOG_DEBUG("listening: " << endpoint);
     do_accept();
   }
 
@@ -79,7 +78,8 @@ private:
   void do_accept() {
     acceptor_.async_accept(socket_, [this](boost::system::error_code ec) {
       if (!ec) {
-        std::make_shared<Session>(std::move(socket_))->start();
+        std::make_shared<Session<Handler>>(std::move(socket_), handler_)
+            ->start();
       }
 
       do_accept();
@@ -121,3 +121,5 @@ public:
 };
 
 } // namespace libtcp_hash
+
+#include <libtcp_hash/server.tpp>

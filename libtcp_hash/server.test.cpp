@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <chrono>
 #include <filesystem>
-#include <libtcp_hash/server.h>
+#include <libtcp_hash/server.hpp>
 #include <thread>
 
 using namespace std::chrono_literals;
@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_SUITE(ServerTests, TEST_TIMEOUT_SECS(16))
 BOOST_AUTO_TEST_CASE(ServerClientTest) {
   io_service io;
   ip::tcp::endpoint tcpAddress{ip::tcp::v4(), 1234};
-  SimpleTcpListener server{io, tcpAddress};
+  EchoProtocol echoProtocol;
+  SimpleTcpListener server{io, tcpAddress, echoProtocol};
   TcpHashClient client{io, tcpAddress};
-
   std::thread ioThread{[&]() { io.run(); }};
   BOOST_TEST("echo Hello" == client.request("echo Hello\n"));
 
