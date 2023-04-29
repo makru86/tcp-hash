@@ -19,7 +19,6 @@ BOOST_AUTO_TEST_CASE(FixedFilledWidthTest) {
   BOOST_TEST(fixedFilledWidth("", 3, '_') == "___");
   BOOST_TEST(fixedFilledWidth("1", 3, '_') == "__1");
   BOOST_TEST(fixedFilledWidth("12345", 3, '+') == "345");
-  LOG_DEBUG("cool");
 }
 
 BOOST_AUTO_TEST_CASE(AnalyzeMetricsTest) {

@@ -1,6 +1,9 @@
 #include "hash.hpp"
 
-libtcp_hash::XxHash::XxHash() noexcept(false) : xxCtx_(nullptr), xxHash_(seed_) { init(); }
+libtcp_hash::XxHash::XxHash() noexcept(false)
+    : xxCtx_(nullptr), xxHash_(seed_) {
+  init();
+}
 libtcp_hash::XxHash::~XxHash() { deinit(); }
 libtcp_hash::XxHash &libtcp_hash::XxHash::feed(libtcp_hash::CharArray chunk) {
   if (XXH64_update(xxCtx_, chunk.data(), chunk.size()) == XXH_ERROR) {

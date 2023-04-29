@@ -1,4 +1,5 @@
-add_library(libtcp_hash STATIC hash.cpp hash.hpp server.tpp server.hpp util.cpp util.hpp)
+add_library(libtcp_hash STATIC hash.cpp hash.hpp server.tpp server.hpp util.cpp util.hpp
+        handler_allocator.hpp client.cpp)
 target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
