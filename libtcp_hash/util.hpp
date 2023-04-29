@@ -57,41 +57,6 @@ std::string getEnvOrValue(const std::string &envName,
                           const std::string &orValue);
 int getEnvOrValue(const std::string &envName, int orValue);
 
-/* LoadtestConfig:
- * Loadtest configuration parameters.
- */
-struct LoadtestConfig {
-  int clientSessions{getEnvOrValue("LOADTEST_CLIENT_SESSIONS", 8)};
-  int testingTime_{getEnvOrValue("LOADTEST_SECONDS", 10)};
-  size_t dataSize{10 * 1024 * 1024};
-  int repeatDataIterations{100};
-  unsigned randomGeneratorSeed{123};
-  boost::asio::ip::tcp::endpoint tcpAddress{boost::asio::ip::tcp::v4(), 1234};
-};
-
-/* LoadtestMetrics:
- */
-struct LoadtestMetrics {
-  std::atomic<uint64_t> timestampStart{};
-  std::atomic<uint64_t> timestampStop{};
-  std::atomic<uint64_t> bytesSent{};
-  std::atomic<uint64_t> bytesReceived{};
-  std::atomic<uint64_t> messagesSent{};
-  std::atomic<uint64_t> messagesReceived{};
-};
-
-/* MetricsAnalized:
- */
-struct MetricsAnalized {
-  double seconds{};
-  double megaHashesPerSecond{};
-  double avgDataSize{};
-};
-
-/* analyzeMetrics():
- */
-MetricsAnalized analyzeMetrics(const LoadtestMetrics &metrics);
-
 /* readWholeFile():
  */
 std::string readWholeFile(std::string_view filename);
@@ -133,10 +98,5 @@ template <typename T> std::string weakPtrDebugInfo(std::weak_ptr<T> weakPtr) {
      << "] ";
   return ss.str();
 }
-
-
-std::ostream &operator<<(std::ostream &os, LoadtestConfig const &value);
-std::ostream &operator<<(std::ostream &os, LoadtestMetrics const &value);
-std::ostream &operator<<(std::ostream &os, MetricsAnalized const &value);
 
 } // namespace libtcp_hash

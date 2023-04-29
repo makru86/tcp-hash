@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <libtcp_hash/util.hpp>
+#include <libtcp_hash/client.hpp>
 
 using namespace libtcp_hash;
 using namespace std::chrono;

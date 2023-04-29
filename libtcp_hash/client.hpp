@@ -23,6 +23,73 @@
 namespace asio = boost::asio;
 namespace libtcp_hash {
 
+/* LoadtestConfig:
+ * Loadtest configuration parameters.
+ */
+struct LoadtestConfig {
+  int clientSessions{getEnvOrValue("LOADTEST_CLIENT_SESSIONS", 8)};
+  int testingTime_{getEnvOrValue("LOADTEST_SECONDS", 10)};
+  size_t dataSize{10 * 1024 * 1024};
+  int repeatDataIterations{100};
+  unsigned randomGeneratorSeed{123};
+  boost::asio::ip::tcp::endpoint tcpAddress{boost::asio::ip::tcp::v4(), 1234};
+};
+
+struct MetricsAnalized {
+  double seconds{};
+  double megaHashesPerSecond{};
+  double avgDataSize{};
+};
+
+struct LoadtestMetrics {
+  std::atomic<uint64_t> timestampStart{};
+  std::atomic<uint64_t> timestampStop{};
+  std::atomic<uint64_t> bytesSent{};
+  std::atomic<uint64_t> bytesReceived{};
+  std::atomic<uint64_t> messagesSent{};
+  std::atomic<uint64_t> messagesReceived{};
+
+  void add(size_t bytes_written, size_t bytes_read) {
+    asio::detail::mutex::scoped_lock lock(mutex_);
+    bytesSent += bytes_written;
+    bytesReceived += bytes_read;
+  }
+
+  void print() {
+    asio::detail::mutex::scoped_lock lock(mutex_);
+    MetricsAnalized analysed{};
+    analysed.seconds = (timestampStop - timestampStart) / 1e9;
+    analysed.megaHashesPerSecond = //
+        messagesReceived.load() / 1e6 / analysed.seconds;
+    analysed.avgDataSize = 1.0 * bytesSent.load() / messagesReceived.load();
+    // avgDataSize:
+    //    For a uniformly-distributed char random number generator that produces
+    //    values in the range [0, 255], the average input line size in the limit
+    //    tends to 255 B.
+
+    LOG_INFO(""                                                    //
+             << "\n Hashrate:"                                     //
+             << "\n   " << analysed.megaHashesPerSecond << " MH/s" //
+             << "\n Latency:"                                      //
+             << "\n   TODO"                                        //
+             << "\n Average data size:"                            //
+             << "\n   " << analysed.avgDataSize << " B"            //
+             << "\n Total time:"                                   //
+             << "\n   " << analysed.seconds << " s"                //
+             << "\n");
+
+    std::cout << bytesSent << " total bytes written\n";
+    std::cout << bytesReceived << " total bytes read\n";
+  }
+
+private:
+  asio::detail::mutex mutex_;
+};
+
+std::ostream &operator<<(std::ostream &os, LoadtestConfig const &value);
+std::ostream &operator<<(std::ostream &os, LoadtestMetrics const &value);
+std::ostream &operator<<(std::ostream &os, MetricsAnalized const &value);
+
 class Stats {
 public:
   Stats() : mutex_(), total_bytes_written_(0), total_bytes_read_(0) {}
@@ -33,11 +100,7 @@ public:
     total_bytes_read_ += bytes_read;
   }
 
-  void print() {
-    asio::detail::mutex::scoped_lock lock(mutex_);
-    std::cout << total_bytes_written_ << " total bytes written\n";
-    std::cout << total_bytes_read_ << " total bytes read\n";
-  }
+  void print() {}
 
 private:
   asio::detail::mutex mutex_;
@@ -55,12 +118,12 @@ class session {
   int unwritten_count_;
   size_t bytes_written_;
   size_t bytes_read_;
-  Stats &stats_;
+  LoadtestMetrics &stats_;
   HandlerAllocator read_allocator_;
   HandlerAllocator write_allocator_;
 
 public:
-  session(asio::io_context &ioc, size_t block_size, Stats &stats)
+  session(asio::io_context &ioc, size_t block_size, LoadtestMetrics &stats)
       : strand_(ioc.get_executor()), socket_(ioc), block_size_(block_size),
         read_data_(new char[block_size]), read_data_length_(0),
         write_data_(new char[block_size]), unwritten_count_(0),
@@ -199,7 +262,7 @@ class TcpHashClient {
   asio::io_context &io_context_;
   asio::steady_timer stop_timer_;
   std::list<session *> sessions_;
-  Stats stats_;
+  LoadtestMetrics stats_;
 
 public:
   struct ErrorResolvingName : std::runtime_error {

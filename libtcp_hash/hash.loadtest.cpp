@@ -1,6 +1,7 @@
 #include <iostream>
 #include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/util.hpp>
+#include <libtcp_hash/client.hpp>
 #include <thread>
 #include <vector>
 
