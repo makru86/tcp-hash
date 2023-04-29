@@ -87,39 +87,6 @@ private:
   }
 };
 
-/*
- * TcpHashClient:
- *  keep-alive - don't close connection after request
- *  pipelining - don't wait response before sending next request
- */
-class TcpHashClient {
-
-  boost::asio::io_context &io_;
-  boost::asio::ip::tcp::socket socket_;
-
-public:
-  TcpHashClient(boost::asio::io_context &io,
-                boost::asio::ip::tcp::endpoint const &endpoint)
-      : io_{io}, socket_(io_) {
-    boost::asio::ip::tcp::resolver dns{io_};
-    connect(socket_, dns.resolve(endpoint));
-  }
-
-  [[nodiscard]] bool connected() const { return socket_.is_open(); }
-
-  std::string request(const std::string &request) {
-    write(socket_, boost::asio::buffer(request));
-
-    boost::asio::streambuf response;
-    boost::asio::read_until(socket_, response, "\n");
-
-    std::istream response_stream(&response);
-    std::string response_str;
-    std::getline(response_stream, response_str);
-    return response_str;
-  }
-};
-
 } // namespace libtcp_hash
 
 #include <libtcp_hash/server.tpp>

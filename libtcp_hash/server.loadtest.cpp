@@ -1,4 +1,5 @@
 #include <iostream>
+#include <libtcp_hash/client.hpp>
 #include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/server.hpp>
 #include <libtcp_hash/util.hpp>
@@ -23,13 +24,14 @@ void serverLoadtest() {
   SimpleTcpListener server{serverIo, testConfig.tcpAddress, echoHandler};
   std::thread serverThread{[&]() { serverIo.run(); }};
   io_service clientIo;
-  TcpHashClient client{clientIo, testConfig.tcpAddress};
+  TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 100, 60};
+
   LOG_INFO("Test config:  " << testConfig);
 
   // Test
   testMetrics.timestampStart = nanoSinceEpoch();
-  auto response{client.request("repeat\nrepeat\n")};
-  LOG_INFO("Response: " << response);
+  //  auto response{client.request("repeat\nrepeat\n")};
+  //  LOG_INFO("Response: " << response);
   testMetrics.timestampStop = nanoSinceEpoch();
   serverIo.stop();
   serverThread.join();

@@ -8,6 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#pragma once
 #include "boost/asio.hpp"
 #include "handler_allocator.hpp"
 #include <algorithm>
@@ -18,10 +19,11 @@
 #include <string>
 
 namespace asio = boost::asio;
+namespace libtcp_hash {
 
-class stats {
+class Stats {
 public:
-  stats() : mutex_(), total_bytes_written_(0), total_bytes_read_(0) {}
+  Stats() : mutex_(), total_bytes_written_(0), total_bytes_read_(0) {}
 
   void add(size_t bytes_written, size_t bytes_read) {
     asio::detail::mutex::scoped_lock lock(mutex_);
@@ -42,12 +44,25 @@ private:
 };
 
 class session {
+  asio::strand<asio::io_context::executor_type> strand_;
+  asio::ip::tcp::socket socket_;
+  size_t block_size_;
+  char *read_data_;
+  size_t read_data_length_;
+  char *write_data_;
+  int unwritten_count_;
+  size_t bytes_written_;
+  size_t bytes_read_;
+  Stats &stats_;
+  HandlerAllocator read_allocator_;
+  HandlerAllocator write_allocator_;
+
 public:
-  session(asio::io_context &ioc, size_t block_size, stats &s)
+  session(asio::io_context &ioc, size_t block_size, Stats &stats)
       : strand_(ioc.get_executor()), socket_(ioc), block_size_(block_size),
         read_data_(new char[block_size]), read_data_length_(0),
         write_data_(new char[block_size]), unwritten_count_(0),
-        bytes_written_(0), bytes_read_(0), stats_(s) {
+        bytes_written_(0), bytes_read_(0), stats_(stats) {
     for (size_t i = 0; i < block_size_; ++i)
       write_data_[i] = static_cast<char>(i % 128);
   }
@@ -59,7 +74,7 @@ public:
     delete[] write_data_;
   }
 
-  void start(asio::ip::tcp::resolver::results_type endpoints) {
+  void start(const asio::ip::tcp::resolver::results_type &endpoints) {
     asio::async_connect(
         socket_, endpoints,
         asio::bind_executor(strand_, boost::bind(&session::handle_connect, this,
@@ -160,30 +175,30 @@ private:
   }
 
   void close_socket() { socket_.close(); }
-
-private:
-  asio::strand<asio::io_context::executor_type> strand_;
-  asio::ip::tcp::socket socket_;
-  size_t block_size_;
-  char *read_data_;
-  size_t read_data_length_;
-  char *write_data_;
-  int unwritten_count_;
-  size_t bytes_written_;
-  size_t bytes_read_;
-  stats &stats_;
-  handler_allocator read_allocator_;
-  handler_allocator write_allocator_;
 };
 
-class client {
+/*
+ * TcpHashClient:
+ *  keep-alive - don't close connection after request
+ *  pipelining - don't wait response before sending next request
+ *
+ * Client taken from Asio tests.
+ * https://github.com/chriskohlhoff/asio/blob/master/asio/src/tests/performance/client.cpp
+ */
+class TcpHashClient {
+  asio::io_context &io_context_;
+  asio::steady_timer stop_timer_;
+  std::list<session *> sessions_;
+  Stats stats_;
+
 public:
-  client(asio::io_context &ioc,
-         const asio::ip::tcp::resolver::results_type endpoints,
-         size_t block_size, size_t session_count, int timeout)
-      : io_context_(ioc), stop_timer_(ioc), sessions_(), stats_() {
+  TcpHashClient(asio::io_context &ioc, const asio::ip::tcp::endpoint &endpoint,
+                size_t block_size, size_t session_count, int timeout)
+      : io_context_(ioc), stop_timer_(ioc) {
     stop_timer_.expires_after(asio::chrono::seconds(timeout));
-    stop_timer_.async_wait(boost::bind(&client::handle_timeout, this));
+    stop_timer_.async_wait(boost::bind(&TcpHashClient::handle_timeout, this));
+
+    auto endpoints{asio::ip::tcp::resolver{io_context_}.resolve(endpoint)};
 
     for (size_t i = 0; i < session_count; ++i) {
       session *new_session = new session(io_context_, block_size, stats_);
@@ -192,7 +207,7 @@ public:
     }
   }
 
-  ~client() {
+  ~TcpHashClient() {
     while (!sessions_.empty()) {
       delete sessions_.front();
       sessions_.pop_front();
@@ -205,18 +220,12 @@ public:
     std::for_each(sessions_.begin(), sessions_.end(),
                   boost::mem_fn(&session::stop));
   }
-
-private:
-  asio::io_context &io_context_;
-  asio::steady_timer stop_timer_;
-  std::list<session *> sessions_;
-  stats stats_;
 };
 
-int master(int argc, char *argv[]) {
+inline int master(int argc, char *argv[]) {
   try {
     if (argc != 7) {
-      std::cerr << "Usage: client <host> <port> <threads> <blocksize> ";
+      std::cerr << "Usage: TcpHashClient <host> <port> <threads> <blocksize> ";
       std::cerr << "<sessions> <time>\n";
       return 1;
     }
@@ -234,7 +243,7 @@ int master(int argc, char *argv[]) {
     asio::ip::tcp::resolver r(ioc);
     asio::ip::tcp::resolver::results_type endpoints = r.resolve(host, port);
 
-    client c(ioc, endpoints, block_size, session_count, timeout);
+    TcpHashClient client(ioc, *endpoints, block_size, session_count, timeout);
 
     std::list<std::thread *> threads;
     while (--thread_count > 0) {
@@ -256,3 +265,5 @@ int master(int argc, char *argv[]) {
 
   return 0;
 }
+
+} // namespace libtcp_hash
