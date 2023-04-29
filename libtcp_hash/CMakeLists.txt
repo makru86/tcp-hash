@@ -5,7 +5,9 @@ target_link_libraries(libtcp_hash PUBLIC
         Boost::system
         Threads::Threads
         coverage_config
-        xxHash::xxHash)
+        xxHash::xxHash
+        asio_config
+        )
 
 function(create_test testname)
     add_executable(test_${testname} main.test.cpp ${testname}.test.cpp)
