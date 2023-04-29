@@ -19,22 +19,26 @@ void serverLoadtest() {
   LoadtestMetrics testMetrics;
   const auto inputData{
       randomString(testConfig.dataSize, testConfig.randomGeneratorSeed)};
-  io_service serverIo;
-  EchoProtocol echoHandler;
-  SimpleTcpListener server{serverIo, testConfig.tcpAddress, echoHandler};
-  std::thread serverThread{[&]() { serverIo.run(); }};
+  //  io_service serverIo;
+  //  EchoProtocol echoHandler;
+  //  SimpleTcpListener server{serverIo, testConfig.tcpAddress, echoHandler};
+  //  std::thread serverThread{[&]() { serverIo.run(); }};
   io_service clientIo;
-  TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 100, 60};
 
   LOG_INFO(testConfig);
 
   // Test
+
   testMetrics.timestampStart = nanoSinceEpoch();
-  //  auto response{client.request("repeat\nrepeat\n")};
-  //  LOG_INFO("Response: " << response);
+  {
+    TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 1, 60};
+    //  auto response{client.request("repeat\nrepeat\n")};
+    //  LOG_INFO("Response: " << response);
+  }
   testMetrics.timestampStop = nanoSinceEpoch();
-  serverIo.stop();
-  serverThread.join();
+
+  //  serverIo.stop();
+  //  serverThread.join();
 
   // Report
   auto analyzed{analyzeMetrics(testMetrics)};
