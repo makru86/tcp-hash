@@ -5,21 +5,13 @@ using Byte = Message::value_type;
 
 template <typename Handler>
 Session<Handler>::Session(boost::asio::ip::tcp::socket socket, Handler handler)
-    : socket_(std::move(socket)), handler_{handler} {
-  LOG_DEBUG(this << ": new connection: " << socket_.remote_endpoint());
-}
-
-template <typename Handler> Session<Handler>::~Session() {
-  LOG_DEBUG(this << ": close connection: " << socket_.remote_endpoint());
-}
+    : socket_(std::move(socket)), handler_{handler} {}
 
 template <typename Handler> void Session<Handler>::receiveMessage() {
   auto self(this->shared_from_this());
-  LOG_DEBUG("receiving...");
   socket_.async_read_some(
       boost::asio::buffer(buffer_, bufferSize_),
       [this, self](boost::system::error_code ec, std::size_t length) {
-        LOG_DEBUG("received: " << length << "ec: " << ec);
         if (!ec) {
           handler_.onMessageReceived(Message(buffer_, length),
                                      [](Message messageToSend) {

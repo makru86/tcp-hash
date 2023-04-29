@@ -17,7 +17,7 @@ void hashLoadtest() {
   LoadtestMetrics testMetrics;
   const auto inputData{
       randomString(testConfig.dataSize, testConfig.randomGeneratorSeed)};
-  LOG_INFO("Test config:  " << testConfig);
+  LOG_INFO(testConfig);
 
   // Test
   testMetrics.timestampStart = nanoSinceEpoch();
@@ -55,6 +55,6 @@ void hashLoadtest() {
 
   // Report
   auto analyzed{analyzeMetrics(testMetrics)};
-  LOG_INFO("Test metrics:\n" << testMetrics);
-  LOG_INFO("Performance test report:\n" << analyzed);
+  LOG_INFO(testMetrics);
+  LOG_INFO(analyzed);
 }

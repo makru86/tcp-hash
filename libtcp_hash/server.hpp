@@ -42,7 +42,6 @@ class Session : public std::enable_shared_from_this<Session<Protocol>> {
 
 public:
   Session(boost::asio::ip::tcp::socket socket, Protocol handler);
-  ~Session();
 
   void start() { receiveMessage(); }
   void receiveMessage();

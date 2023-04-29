@@ -26,7 +26,7 @@ void serverLoadtest() {
   io_service clientIo;
   TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 100, 60};
 
-  LOG_INFO("Test config:  " << testConfig);
+  LOG_INFO(testConfig);
 
   // Test
   testMetrics.timestampStart = nanoSinceEpoch();
@@ -38,8 +38,8 @@ void serverLoadtest() {
 
   // Report
   auto analyzed{analyzeMetrics(testMetrics)};
-  LOG_INFO("Test metrics:\n" << testMetrics);
-  LOG_INFO("Performance test report:\n" << analyzed);
+  LOG_INFO(testMetrics);
+  LOG_INFO(analyzed);
 
   /*
     io_service io;
