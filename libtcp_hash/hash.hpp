@@ -55,15 +55,16 @@ class XxHash {
   XXH64_state_t *xxCtx_;
   XXH64_hash_t xxHash_;
   static constexpr size_t seed_ = 0;
-std::mutex m;
+  std::mutex m;
+
 public:
   explicit XxHash() noexcept(false);
   ~XxHash();
-  XxHash(XxHash const&) = delete;
-  XxHash &operator=(XxHash const&) = delete;
+  XxHash(XxHash const &) = delete;
+  XxHash &operator=(XxHash const &) = delete;
 
-      // Add data to hash function
-      XxHash &feed(CharArray chunk);
+  // Add data to hash function
+  XxHash &feed(CharArray chunk);
 
   // Return final hash, and prepare for next.
   HashValue digest();

@@ -37,17 +37,4 @@ std::ostream &operator<<(std::ostream &os, LoadtestMetrics const &value) {
             << "\n";
 }
 
-std::ostream &operator<<(std::ostream &os, MetricsAnalized const &value) {
-  return os << "MetricsAnalized:"                              //
-            << "\n Hashrate:"                                  //
-            << "\n   " << value.megaHashesPerSecond << " MH/s" //
-            << "\n Latency:"                                   //
-            << "\n   TODO"                                     //
-            << "\n Average data size:"                         //
-            << "\n   " << value.avgDataSize << " B"            //
-            << "\n Total time:"                                //
-            << "\n   " << value.seconds << " s"                //
-            << "\n";
-}
-
 } // namespace libtcp_hash

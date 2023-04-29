@@ -53,4 +53,5 @@ void hashLoadtest() {
     threads[i].join();
   }
   testMetrics.timestampStop = nanoSinceEpoch();
+  LOG_INFO(testMetrics.makeReport());
 }

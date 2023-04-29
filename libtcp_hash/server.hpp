@@ -21,7 +21,7 @@ namespace libtcp_hash {
 struct EchoProtocol {
   using SendMessageCb = std::function<void(std::string_view)>;
   static void onMessageReceived(std::string_view message,
-                         SendMessageCb sendMessageCb) {
+                                SendMessageCb sendMessageCb) {
     sendMessageCb(message);
   }
 };
