@@ -39,10 +39,7 @@ void serverLoadtest() {
   //  serverIo.stop();
   //  serverThread.join();
 
-  // Report
-  auto analyzed{analyzeMetrics(testMetrics)};
-  LOG_INFO(testMetrics);
-  LOG_INFO(analyzed);
+  LOG_INFO(testMetrics.makeReport());
 
   /*
     io_service io;

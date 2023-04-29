@@ -1,7 +1,7 @@
 #include <iostream>
+#include <libtcp_hash/client.hpp>
 #include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/util.hpp>
-#include <libtcp_hash/client.hpp>
 #include <thread>
 #include <vector>
 
@@ -53,9 +53,4 @@ void hashLoadtest() {
     threads[i].join();
   }
   testMetrics.timestampStop = nanoSinceEpoch();
-
-  // Report
-  auto analyzed{analyzeMetrics(testMetrics)};
-  LOG_INFO(testMetrics);
-  LOG_INFO(analyzed);
 }

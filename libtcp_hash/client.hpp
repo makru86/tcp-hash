@@ -55,31 +55,30 @@ struct LoadtestMetrics {
     bytesReceived += bytes_read;
   }
 
-  void print() {
+  std::string makeReport() {
     asio::detail::mutex::scoped_lock lock(mutex_);
     MetricsAnalized analysed{};
     analysed.seconds = (timestampStop - timestampStart) / 1e9;
-    analysed.megaHashesPerSecond = //
-        messagesReceived.load() / 1e6 / analysed.seconds;
     analysed.avgDataSize = 1.0 * bytesSent.load() / messagesReceived.load();
+    analysed.megaHashesPerSecond =
+        messagesReceived.load() / 1e6 / analysed.seconds;
     // avgDataSize:
     //    For a uniformly-distributed char random number generator that produces
     //    values in the range [0, 255], the average input line size in the limit
     //    tends to 255 B.
 
-    LOG_INFO(""                                                    //
-             << "\n Hashrate:"                                     //
-             << "\n   " << analysed.megaHashesPerSecond << " MH/s" //
-             << "\n Latency:"                                      //
-             << "\n   TODO"                                        //
-             << "\n Average data size:"                            //
-             << "\n   " << analysed.avgDataSize << " B"            //
-             << "\n Total time:"                                   //
-             << "\n   " << analysed.seconds << " s"                //
-             << "\n");
-
-    std::cout << bytesSent << " total bytes written\n";
-    std::cout << bytesReceived << " total bytes read\n";
+    std::stringstream report;
+    report << ""                                                 //
+           << "\n Hashrate:"                                     //
+           << "\n   " << analysed.megaHashesPerSecond << " MH/s" //
+           << "\n Latency:"                                      //
+           << "\n   TODO"                                        //
+           << "\n Average data size:"                            //
+           << "\n   " << analysed.avgDataSize << " B"            //
+           << "\n Total time:"                                   //
+           << "\n   " << analysed.seconds << " s"                //
+           << "\n";
+    return report.str();
   }
 
 private:
@@ -100,7 +99,7 @@ public:
     total_bytes_read_ += bytes_read;
   }
 
-  void print() {}
+  void makeReport() {}
 
 private:
   asio::detail::mutex mutex_;
@@ -296,7 +295,7 @@ public:
       sessions_.pop_front();
     }
 
-    stats_.print();
+    stats_.makeReport();
   }
 
   void handle_timeout() {

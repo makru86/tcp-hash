@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <libtcp_hash/util.hpp>
 #include <libtcp_hash/client.hpp>
+#include <libtcp_hash/util.hpp>
 
 using namespace libtcp_hash;
 using namespace std::chrono;
@@ -28,11 +28,17 @@ BOOST_AUTO_TEST_CASE(AnalyzeMetricsTest) {
   metrics.timestampStop = 1'000;     // 1 microsecond
   metrics.bytesSent = 600'000;       //
   metrics.messagesReceived = 30'000; //
-  MetricsAnalized analized = analyzeMetrics(metrics);
 
-  BOOST_TEST(analized.megaHashesPerSecond == 30'000.);
-  BOOST_TEST(analized.avgDataSize == 20.);
-  BOOST_TEST(analized.seconds == 1e-6);
+  BOOST_TEST(metrics.makeReport() == //
+             "\n"
+             " Hashrate:\n"
+             "   30000 MH/s\n"
+             " Latency:\n"
+             "   TODO\n"
+             " Average data size:\n"
+             "   20 B\n"
+             " Total time:\n"
+             "   1e-06 s\n");
 }
 
 BOOST_AUTO_TEST_CASE(RandomStringTest) {

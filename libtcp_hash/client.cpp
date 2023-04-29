@@ -1,7 +1,6 @@
 #include <libtcp_hash/client.hpp>
 #include <random>
 
-
 namespace libtcp_hash {
 
 std::string randomString(size_t length, unsigned int seed) {
