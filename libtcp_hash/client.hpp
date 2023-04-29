@@ -16,6 +16,7 @@
 #include <boost/mem_fn.hpp>
 #include <iostream>
 #include <libtcp_hash/hash.hpp>
+#include <libtcp_hash/util.hpp>
 #include <list>
 #include <string>
 
@@ -92,7 +93,7 @@ private:
       LOG_ERROR(err);
       return;
     }
-
+    LOG_DEBUG("connected");
     boost::system::error_code set_option_err;
     asio::ip::tcp::no_delay no_delay(true);
     socket_.set_option(no_delay, set_option_err);
@@ -123,6 +124,7 @@ private:
       LOG_ERROR(err);
       return;
     }
+    LOG_DEBUG("handle_read:" << length);
     bytes_read_ += length;
     read_data_length_ = length;
     ++unwritten_count_;
@@ -153,10 +155,7 @@ private:
       LOG_ERROR(err);
       return;
     }
-    if (length == 0) {
-      LOG_DEBUG("length == 0");
-      return;
-    }
+    LOG_DEBUG("handle_write:" << length);
     bytes_written_ += length;
 
     --unwritten_count_;
@@ -182,7 +181,10 @@ private:
     }
   }
 
-  void close_socket() { socket_.close(); }
+  void close_socket() {
+    LOG_DEBUG("close socket");
+    socket_.close();
+  }
 };
 
 /*
@@ -200,13 +202,23 @@ class TcpHashClient {
   Stats stats_;
 
 public:
+  struct ErrorResolvingName : std::runtime_error {
+    ErrorResolvingName() : std::runtime_error{"ErrorResolvingName"} {}
+  };
+
   TcpHashClient(asio::io_context &ioc, const asio::ip::tcp::endpoint &endpoint,
-                size_t block_size, size_t session_count, int timeout)
-      : io_context_(ioc), stop_timer_(ioc) {
+                size_t block_size, size_t session_count,
+                int timeout) noexcept(false)
+      : io_context_(ioc), stop_timer_(ioc) //
+  {
     stop_timer_.expires_after(asio::chrono::seconds(timeout));
     stop_timer_.async_wait(boost::bind(&TcpHashClient::handle_timeout, this));
 
-    auto endpoints{asio::ip::tcp::resolver{io_context_}.resolve(endpoint)};
+    auto resolver{asio::ip::tcp::resolver{io_context_}};
+    auto endpoints{resolver.resolve(endpoint)};
+    if (endpoints.empty()) {
+      throw ErrorResolvingName{};
+    }
 
     for (size_t i = 0; i < session_count; ++i) {
       session *new_session = new session(io_context_, block_size, stats_);

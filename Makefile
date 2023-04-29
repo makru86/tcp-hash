@@ -30,8 +30,8 @@ coverage-report:
 
 prototype-up:
 	@echo "Starting prototype..."
-	@docker-compose -f docker-compose.yml -f docker-compose.mock.yml up prototype
+	@docker-compose -f docker-compose.yml -f compose-prototype.yaml up prototype
 
 prototype-down:
 	@echo "Stopping prototype..."
-	@docker-compose -f docker-compose.yml -f docker-compose.mock.yml down --remove-orphans
+	@docker-compose -f docker-compose.yml -f compose-prototype.yaml down --remove-orphans

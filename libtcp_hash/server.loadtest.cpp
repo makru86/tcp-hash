@@ -31,9 +31,8 @@ void serverLoadtest() {
 
   testMetrics.timestampStart = nanoSinceEpoch();
   {
-    TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 1, 60};
-    //  auto response{client.request("repeat\nrepeat\n")};
-    //  LOG_INFO("Response: " << response);
+    TcpHashClient client{clientIo, testConfig.tcpAddress, 4096, 10, 60};
+    clientIo.run();
   }
   testMetrics.timestampStop = nanoSinceEpoch();
 
