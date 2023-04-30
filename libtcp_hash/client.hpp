@@ -20,8 +20,8 @@
 #include <list>
 #include <string>
 
-namespace asio = boost::asio;
 namespace libtcp_hash {
+namespace asio = boost::asio;
 
 /* LoadtestConfig:
  * Loadtest configuration parameters.

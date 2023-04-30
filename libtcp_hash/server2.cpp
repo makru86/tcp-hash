@@ -16,11 +16,14 @@
 #include <list>
 
 namespace libtcp_hash2 {
-namespace asio = boost::asio;
+
+namespace Asio = boost::asio;
+using ErrorCode = boost::system::error_code;
+using Thread = std::thread;
 
 class session {
 public:
-  session(asio::io_context &ioc, size_t block_size)
+  session(Asio::io_context &ioc, size_t block_size)
       : io_context_(ioc), strand_(ioc.get_executor()), socket_(ioc),
         block_size_(block_size), read_data_(new char[block_size]),
         read_data_length_(0), write_data_(new char[block_size]),
@@ -31,29 +34,29 @@ public:
     delete[] write_data_;
   }
 
-  asio::ip::tcp::socket &socket() { return socket_; }
+  Asio::ip::tcp::socket &socket() { return socket_; }
 
   void start() {
-    asio::error_code set_option_err;
-    asio::ip::tcp::no_delay no_delay(true);
+    ErrorCode set_option_err;
+    Asio::ip::tcp::no_delay no_delay(true);
     socket_.set_option(no_delay, set_option_err);
     if (!set_option_err) {
       ++op_count_;
       socket_.async_read_some(
-          asio::buffer(read_data_, block_size_),
-          asio::bind_executor(
+          Asio::buffer(read_data_, block_size_),
+          Asio::bind_executor(
               strand_,
               make_custom_alloc_handler(
                   read_allocator_,
                   boost::bind(&session::handle_read, this,
-                              asio::placeholders::error,
-                              asio::placeholders::bytes_transferred))));
+                              Asio::placeholders::error,
+                              Asio::placeholders::bytes_transferred))));
     } else {
-      asio::post(io_context_, boost::bind(&session::destroy, this));
+      Asio::post(io_context_, boost::bind(&session::destroy, this));
     }
   }
 
-  void handle_read(const asio::error_code &err, size_t length) {
+  void handle_read(const ErrorCode &err, size_t length) {
     --op_count_;
 
     if (!err) {
@@ -62,29 +65,29 @@ public:
       if (unsent_count_ == 1) {
         op_count_ += 2;
         std::swap(read_data_, write_data_);
-        async_write(socket_, asio::buffer(write_data_, read_data_length_),
-                    asio::bind_executor(
+        async_write(socket_, Asio::buffer(write_data_, read_data_length_),
+                    Asio::bind_executor(
                         strand_, make_custom_alloc_handler(
                                      write_allocator_,
                                      boost::bind(&session::handle_write, this,
-                                                 asio::placeholders::error))));
+                                                 Asio::placeholders::error))));
         socket_.async_read_some(
-            asio::buffer(read_data_, block_size_),
-            asio::bind_executor(
+            Asio::buffer(read_data_, block_size_),
+            Asio::bind_executor(
                 strand_,
                 make_custom_alloc_handler(
                     read_allocator_,
                     boost::bind(&session::handle_read, this,
-                                asio::placeholders::error,
-                                asio::placeholders::bytes_transferred))));
+                                Asio::placeholders::error,
+                                Asio::placeholders::bytes_transferred))));
       }
     }
 
     if (op_count_ == 0)
-      asio::post(io_context_, boost::bind(&session::destroy, this));
+      Asio::post(io_context_, boost::bind(&session::destroy, this));
   }
 
-  void handle_write(const asio::error_code &err) {
+  void handle_write(const ErrorCode &err) {
     --op_count_;
 
     if (!err) {
@@ -92,51 +95,51 @@ public:
       if (unsent_count_ == 1) {
         op_count_ += 2;
         std::swap(read_data_, write_data_);
-        async_write(socket_, asio::buffer(write_data_, read_data_length_),
-                    asio::bind_executor(
+        async_write(socket_, Asio::buffer(write_data_, read_data_length_),
+                    Asio::bind_executor(
                         strand_, make_custom_alloc_handler(
                                      write_allocator_,
                                      boost::bind(&session::handle_write, this,
-                                                 asio::placeholders::error))));
+                                                 Asio::placeholders::error))));
         socket_.async_read_some(
-            asio::buffer(read_data_, block_size_),
-            asio::bind_executor(
+            Asio::buffer(read_data_, block_size_),
+            Asio::bind_executor(
                 strand_,
                 make_custom_alloc_handler(
                     read_allocator_,
                     boost::bind(&session::handle_read, this,
-                                asio::placeholders::error,
-                                asio::placeholders::bytes_transferred))));
+                                Asio::placeholders::error,
+                                Asio::placeholders::bytes_transferred))));
       }
     }
 
     if (op_count_ == 0)
-      asio::post(io_context_, boost::bind(&session::destroy, this));
+      Asio::post(io_context_, boost::bind(&session::destroy, this));
   }
 
   static void destroy(session *s) { delete s; }
 
 private:
-  asio::io_context &io_context_;
-  asio::strand<asio::io_context::executor_type> strand_;
-  asio::ip::tcp::socket socket_;
+  Asio::io_context &io_context_;
+  Asio::strand<Asio::io_context::executor_type> strand_;
+  Asio::ip::tcp::socket socket_;
   size_t block_size_;
   char *read_data_;
   size_t read_data_length_;
   char *write_data_;
   int unsent_count_;
   int op_count_;
-  handler_allocator read_allocator_;
-  handler_allocator write_allocator_;
+  libtcp_hash::HandlerAllocator read_allocator_;
+  libtcp_hash::HandlerAllocator write_allocator_;
 };
 
 class server {
 public:
-  server(asio::io_context &ioc, const asio::ip::tcp::endpoint &endpoint,
+  server(Asio::io_context &ioc, const Asio::ip::tcp::endpoint &endpoint,
          size_t block_size)
       : io_context_(ioc), acceptor_(ioc), block_size_(block_size) {
     acceptor_.open(endpoint.protocol());
-    acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address(1));
+    acceptor_.set_option(Asio::ip::tcp::acceptor::reuse_address(1));
     acceptor_.bind(endpoint);
     acceptor_.listen();
 
@@ -147,10 +150,10 @@ public:
     session *new_session = new session(io_context_, block_size_);
     acceptor_.async_accept(new_session->socket(),
                            boost::bind(&server::handle_accept, this,
-                                       new_session, asio::placeholders::error));
+                                       new_session, Asio::placeholders::error));
   }
 
-  void handle_accept(session *new_session, const asio::error_code &err) {
+  void handle_accept(session *new_session, const ErrorCode &err) {
     if (!err) {
       new_session->start();
     } else {
@@ -161,8 +164,8 @@ public:
   }
 
 private:
-  asio::io_context &io_context_;
-  asio::ip::tcp::acceptor acceptor_;
+  Asio::io_context &io_context_;
+  Asio::ip::tcp::acceptor acceptor_;
   size_t block_size_;
 };
 
@@ -174,20 +177,20 @@ int main(int argc, char *argv[]) {
     }
 
     using namespace std; // For atoi.
-    asio::ip::address address = asio::ip::make_address(argv[1]);
+    Asio::ip::address address = Asio::ip::make_address(argv[1]);
     short port = atoi(argv[2]);
     int thread_count = atoi(argv[3]);
     size_t block_size = atoi(argv[4]);
 
-    asio::io_context ioc;
+    Asio::io_context ioc;
 
-    server s(ioc, asio::ip::tcp::endpoint(address, port), block_size);
+    server s(ioc, Asio::ip::tcp::endpoint(address, port), block_size);
 
     // Threads not currently supported in this test.
-    std::list<asio::thread *> threads;
+    std::list<Thread *> threads;
     while (--thread_count > 0) {
-      asio::thread *new_thread =
-          new asio::thread(boost::bind(&asio::io_context::run, &ioc));
+      Thread *new_thread =
+          new Thread(boost::bind(&Asio::io_context::run, &ioc));
       threads.push_back(new_thread);
     }
 
