@@ -7,6 +7,8 @@ RUN apt-get update \
       g++ \
       gdb \
       clang \
+      clang-12 \
+      libc++-12-dev \
       make \
       ninja-build \
       cmake \

@@ -1,10 +1,11 @@
 add_library(libtcp_hash STATIC hash.cpp hash.hpp server.tpp server.hpp util.cpp util.hpp
-        handler_allocator.hpp client.hpp client.cpp)
+        handler_allocator.hpp client.hpp client.cpp server2.hpp)
 target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
         Threads::Threads
         coverage_config
+        coroutine_config
         xxHash::xxHash
         asio_config
         )
@@ -24,7 +25,8 @@ if (BUILD_UNIT_TESTS)
     enable_testing()
     create_test("util")
     create_test("hash")
-    create_test("server")
+#    create_test("server")
+    create_test("server2")
 endif ()
 
 if (BUILD_LOAD_TESTS)

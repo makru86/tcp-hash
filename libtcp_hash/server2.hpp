@@ -15,7 +15,7 @@
 #include <iostream>
 #include <list>
 
-namespace libtcp_hash2 {
+namespace libtcp_hash {
 
 namespace Asio = boost::asio;
 using ErrorCode = boost::system::error_code;
@@ -169,42 +169,4 @@ private:
   size_t block_size_;
 };
 
-int main(int argc, char *argv[]) {
-  try {
-    if (argc != 5) {
-      std::cerr << "Usage: server <address> <port> <threads> <blocksize>\n";
-      return 1;
-    }
-
-    using namespace std; // For atoi.
-    Asio::ip::address address = Asio::ip::make_address(argv[1]);
-    short port = atoi(argv[2]);
-    int thread_count = atoi(argv[3]);
-    size_t block_size = atoi(argv[4]);
-
-    Asio::io_context ioc;
-
-    server s(ioc, Asio::ip::tcp::endpoint(address, port), block_size);
-
-    // Threads not currently supported in this test.
-    std::list<Thread *> threads;
-    while (--thread_count > 0) {
-      Thread *new_thread =
-          new Thread(boost::bind(&Asio::io_context::run, &ioc));
-      threads.push_back(new_thread);
-    }
-
-    ioc.run();
-
-    while (!threads.empty()) {
-      threads.front()->join();
-      delete threads.front();
-      threads.pop_front();
-    }
-  } catch (std::exception &e) {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
-
-  return 0;
-}
 } // namespace libtcp_hash2

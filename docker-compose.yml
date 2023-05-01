@@ -10,6 +10,9 @@ services:
     working_dir: /project
     ports:
       - "1234:1234"
+    environment:
+      - CC=/usr/bin/clang-12
+      - CXX=/usr/bin/clang++-12
     command:
       - bash
       - -c

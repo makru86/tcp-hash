@@ -1,7 +1,8 @@
 #! /bin/sh
 
 if [ $# -gt 1 ]; then
-  echo "Usage: $1 <port>"
+  echo "Usage: $1 [ <port> ]"
+  echo "    Default port is 1234."
   echo "    Press Ctrl-C to exit."
   exit 1
 fi
@@ -17,6 +18,7 @@ echo " VERBOSITY=$VERBOSITY"
 echo " MAX_CONNS=$MAX_CONNS"
 echo " THIS_DIR=$THIS_DIR"
 
+ls $THIS_DIR/prototype_handler.sh || exit 1
 ncat -l $LISTEN_PORT $VERBOSITY \
-    --keep-open $MAX_CONNS \
+    --keep-open --nodns $MAX_CONNS \
     --sh-exec "xargs --null -n1 $THIS_DIR/prototype_handler.sh"
