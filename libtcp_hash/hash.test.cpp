@@ -122,6 +122,8 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
                               // no 4th hash value, because newline was not sent
   };
 
+  BOOST_TEST(hexen(4952883123889572249ull) == "44bc2cf5ad770999");
+
   // Pass input to tokenizer, check that callback is called with expected
   // HashValue:
   tokenizer(input, //
