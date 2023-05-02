@@ -33,7 +33,7 @@ void hashLoadtest() {
       for (auto i{0}; i != testConfig.repeatDataIterations; ++i) {
         // call the tokenizer with the input data...
         tokenizer(inputData, //
-                  [&](CharArray chunk, bool separatorFound) {
+                  [&](StrView chunk, bool separatorFound) {
                     // on each callback from tokenizer feed FSM...
                     fsm.feed(chunk);
                     if (separatorFound) {

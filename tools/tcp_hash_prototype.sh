@@ -21,4 +21,4 @@ echo " THIS_DIR=$THIS_DIR"
 ls $THIS_DIR/prototype_handler.sh || exit 1
 ncat -l $LISTEN_PORT $VERBOSITY \
     --keep-open --nodns $MAX_CONNS \
-    --sh-exec "xargs --null -n1 $THIS_DIR/prototype_handler.sh"
+    --sh-exec "xargs --delimiter='\n' -n1 $THIS_DIR/prototype_handler.sh"

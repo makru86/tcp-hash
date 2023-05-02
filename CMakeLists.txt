@@ -47,8 +47,8 @@ if (ASIO_ENABLE_HANDLER_TRACKING)
     target_compile_definitions(asio_config INTERFACE BOOST_ASIO_ENABLE_HANDLER_TRACKING)
 endif ()
 
-add_executable(cc cc.cc)
-target_link_libraries(cc PRIVATE coroutine_config)
+#add_executable(cc cc.cc)
+#target_link_libraries(cc PRIVATE coroutine_config)
 
-#add_subdirectory(libtcp_hash)
-#add_subdirectory(tcp_hash)
+add_subdirectory(libtcp_hash)
+add_subdirectory(tcp_hash)

@@ -12,7 +12,7 @@
 #define TCP_HASH_LOG_MESSAGE(severity, msg)                                    \
   libtcp_hash::fixedFilledWidth(std::to_string(libtcp_hash::nanoSinceEpoch()), \
                                 10, '0')                                       \
-      << "_us " severity " tid_" << std::this_thread::get_id() << " .."        \
+      << "_us " severity << " .."        \
       << libtcp_hash::fixedFilledWidth(__FILE__, 16, ' ') << ":"               \
       << libtcp_hash::fixedFilledWidth(std::to_string(__LINE__), 3, '0')       \
       << " " << msg << std::endl

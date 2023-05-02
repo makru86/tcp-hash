@@ -7,7 +7,7 @@
 namespace libtcp_hash {
 
 struct OnChunkCbArgs {
-  CharArray charArray_;
+  StrView charArray_;
   bool separatorFound_;
 };
 bool operator==(const OnChunkCbArgs &left, const OnChunkCbArgs &right) {
@@ -17,7 +17,7 @@ bool operator==(const OnChunkCbArgs &left, const OnChunkCbArgs &right) {
   return order(left) == order(right);
 }
 std::ostream &operator<<(std::ostream &os, const OnChunkCbArgs &value) {
-  os << "CharArray: " << value.charArray_
+  os << "StrView: " << value.charArray_
      << ", separatorFound: " << value.separatorFound_;
   return os;
 }
@@ -25,7 +25,7 @@ std::ostream &operator<<(std::ostream &os, const OnChunkCbArgs &value) {
 BOOST_AUTO_TEST_SUITE(HashTests)
 
 BOOST_AUTO_TEST_CASE(TokenizerTest) {
-  CharArray input{
+  StrView input{
       "Hello, world!\n" //
       "\n"              //
       "abc\n"           //
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(TokenizerTest) {
   // Pass input to tokenizer, check that callback is called with expected
   // CallbackArgs:
   tokenizer(input, //
-            [&](CharArray chunk, bool separatorFound) {
+            [&](StrView chunk, bool separatorFound) {
               OnChunkCbArgs actual{chunk, separatorFound};
               BOOST_TEST(actual == expected.front());
               expected.pop_front();
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(XxHashTest) {
 
 class MockXxHash {
 public:
-  CharArray feedArg_;
+  StrView feedArg_;
   HashValue digestReturn_;
 
   MockXxHash() noexcept = default;
@@ -71,7 +71,7 @@ public:
   MockXxHash(const MockXxHash &) = delete;
   MockXxHash &operator=(const MockXxHash &) = delete;
 
-  MockXxHash &feed(CharArray chunk) {
+  MockXxHash &feed(StrView chunk) {
     BOOST_TEST(chunk == feedArg_);
     return *this;
   }
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
   XxHash xxHash;
   FSM fsm{xxHash};
 
-  CharArray input{
+  StrView input{
       "Hello, world!\n" //
       "\n"              //
       "abc\n"           //
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
   // Pass input to tokenizer, check that callback is called with expected
   // HashValue:
   tokenizer(input, //
-            [&](CharArray chunk, bool separatorFound) {
+            [&](StrView chunk, bool separatorFound) {
               fsm.feed(chunk);
               if (separatorFound) {
                 HashValue actual = fsm.digest();

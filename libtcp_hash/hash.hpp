@@ -8,8 +8,8 @@
 
 namespace libtcp_hash {
 
-using CharArray = std::string_view;
-using Char = CharArray::value_type;
+using StrView = std::string_view;
+using Char = StrView::value_type;
 using HashValue = uint64_t;
 
 /*
@@ -28,7 +28,7 @@ using HashValue = uint64_t;
  * OnChunkCb: void(StringView chunk, bool newlineFound)
  */
 template <typename OnChunkCb>
-void tokenizer(CharArray input, OnChunkCb onChunkCb) {
+void tokenizer(StrView input, OnChunkCb onChunkCb) {
   static constexpr Char separator_ = '\n';
   if (input.empty()) {
     return;
@@ -64,13 +64,13 @@ public:
   XxHash &operator=(XxHash const &) = delete;
 
   // Add data to hash function
-  XxHash &feed(CharArray chunk);
+  XxHash &feed(StrView chunk);
 
   // Return final hash, and prepare for next.
   HashValue digest();
 
 private:
-  void init();
+  void reset();
   void deinit();
 };
 
@@ -101,7 +101,7 @@ template <typename XxHashT> class StatefulHasher {
 public:
   explicit StatefulHasher(XxHashT &xxHash) : xxHash_(xxHash) {}
 
-  StatefulHasher &feed(CharArray chunk) {
+  StatefulHasher &feed(StrView chunk) {
     if (chunk.empty()) {
       // Skip empty chunk.
       return *this;
