@@ -31,7 +31,7 @@ bool approximatelyEqual(size_t left, size_t rigth, size_t delta) {
   return (left >= rigth && left - rigth <= delta) ||
          (rigth > left && rigth - left <= delta);
 }
-std::string hexen(uint64_t value) {
+std::string to_hex_str(uint64_t value) {
   std::stringstream ss;
   ss << std::setfill('0') << std::setw(16) << std::hex << value;
   return ss.str();

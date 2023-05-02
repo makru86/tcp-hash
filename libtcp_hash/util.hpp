@@ -79,10 +79,10 @@ std::string fixedFilledWidth(std::string const &text, size_t width,
  */
 uint64_t nanoSinceEpoch();
 
-/* hexen():
+/* to_hex_str():
  * Convert integer value to a HEX string.
  */
-std::string hexen(uint64_t value);
+std::string to_hex_str(uint64_t value);
 
 /* randomString():
  * generate random string of given length using random_device

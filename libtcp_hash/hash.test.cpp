@@ -53,12 +53,12 @@ BOOST_AUTO_TEST_CASE(XxHashTest) {
   XxHash xxHash;
 
   // Same input - same result:
-  BOOST_TEST(hexen(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
-  BOOST_TEST(hexen(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
+  BOOST_TEST(to_hex_str(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
+  BOOST_TEST(to_hex_str(xxHash.feed("Hello").digest()) == "0a75a91375b27d44");
 
   // Empty input:
-  BOOST_TEST(hexen(xxHash.digest()) == "ef46db3751d8e999");
-  BOOST_TEST(hexen(xxHash.feed("").digest()) == "ef46db3751d8e999");
+  BOOST_TEST(to_hex_str(xxHash.digest()) == "ef46db3751d8e999");
+  BOOST_TEST(to_hex_str(xxHash.feed("").digest()) == "ef46db3751d8e999");
 }
 
 class MockXxHash {
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
                               // no 4th hash value, because newline was not sent
   };
 
-  BOOST_TEST(hexen(4952883123889572249ull) == "44bc2cf5ad770999");
+  BOOST_TEST(to_hex_str(4952883123889572249ull) == "44bc2cf5ad770999");
 
   // Pass input to tokenizer, check that callback is called with expected
   // HashValue:
