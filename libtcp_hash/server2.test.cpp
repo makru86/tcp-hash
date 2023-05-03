@@ -2,6 +2,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/static_thread_pool.hpp>
 #include <boost/test/unit_test.hpp>
+#include <compare>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -21,6 +22,20 @@ libtcp_hash::XxHash xxHash;
 FSM fsm{xxHash};
 asio::static_thread_pool static_thread_pool{1};
 
+template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
+  LOG_DEBUG("NN\n,received:'" << data << "'," << data.size());
+  auto &&on_token = [&](StrView token, bool final) {
+    LOG_DEBUG("NN\nhashing:'" << token << "'," << token.size() << "," << final);
+    fsm.feed(token);
+    if (final) {
+      HashValue hash = fsm.digest();
+      std::string hash_str = to_hex_str(hash) + '\n';
+      on_hash(std::move(hash_str));
+    }
+  };
+  libtcp_hash::tokenizer(data, on_token);
+}
+
 class session : public std::enable_shared_from_this<session> {
 public:
   session(tcp::socket socket,
@@ -29,12 +44,6 @@ public:
 
   void start() { do_read(); }
 
-  void write(std::string data) {
-    assert(data.size() < max_length);
-    std::copy(data.cbegin(), data.cend(), write_data_);
-    do_write(data.size());
-  }
-
 private:
   void do_read() {
     auto self(shared_from_this());
@@ -42,34 +51,32 @@ private:
         asio::buffer(data_, max_length),
         [this, self](std::error_code ec, std::size_t length) {
           if (!ec) {
-            if (auto thread_pool = thread_pool_.lock()){
-              asio::post(*thread_pool, [thread_pool](){
-                process(std::string{data_, length},
-                  нельля здесь this - другой executor
-                        std::bind(&session::write, this, std::placeholders::_1));
-              });
+            if (auto thread_pool = thread_pool_.lock()) {
+              auto data{std::string{data_, length}};
+              asio::post(*thread_pool, //
+                         [self, thread_pool, data]() {
+                           auto weak{std::weak_ptr<session>{self}};
+                           process(data, //
+                                   std::bind(&session::on_hash, weak,
+                                             std::placeholders::_1));
+                         });
             }
             do_read();
           }
         });
   }
 
-  // process
-  template <typename OnResultCb> void process(std::string data, OnResultCb cb) {
-    auto length = data.size();
-    LOG_DEBUG("NN\n,received:'" << data << "'," << length);
-    libtcp_hash::tokenizer(data, // on token:
-                           [&](StrView token, bool final) {
-                             LOG_DEBUG("NN\nhashing:'" << token << "',"
-                                                       << token.size() << ","
-                                                       << final);
-                             fsm.feed(token);
-                             if (final) {
-                               HashValue hash = fsm.digest();
-                               std::string hash_str = to_hex_str(hash) + '\n';
-                               cb(std::move(hash_str));
-                             }
-                           });
+  static void on_hash(std::weak_ptr<session> weak_self, std::string hash) {
+    auto self{weak_self.lock()};
+    if (self) {
+      self->write(hash);
+    }
+  }
+
+  void write(std::string data) {
+    assert(data.size() < max_length);
+    std::copy(data.cbegin(), data.cend(), write_data_);
+    do_write(data.size());
   }
 
   void do_write(std::size_t length) {
@@ -114,7 +121,6 @@ private:
 
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  size_t next_session_id_{0};
   std::shared_ptr<asio::static_thread_pool> thread_pool_{
       std::make_shared<asio::static_thread_pool>(1)};
 };
@@ -126,7 +132,7 @@ BOOST_AUTO_TEST_CASE(TokenizerTest) {
 
     asio::io_context io_context;
 
-    server s(io_context, 1234);
+    server server(io_context, 1234);
 
     io_context.run();
   } catch (std::exception &e) {
