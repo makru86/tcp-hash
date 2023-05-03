@@ -5,10 +5,11 @@
 
 Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
 
-- libboost-all-dev
+- libboost-all-dev mostly for Asio (see [asio-handler-tracking](assets/asio_handler_tracking.png))
 - libxxhash-dev
 
-Googletest was not used because Boost Unittest was already configured in this project's template (see [zethon/CCCBTemplate](https://github.com/zethon/CCCBTemplate)). And because this is a simple project, any unittesting framework works well.
+- this project's template [zethon/CCCBTemplate](https://github.com/zethon/CCCBTemplate)
+
 
 ## Building and running
 
@@ -28,8 +29,11 @@ Start Docker service `prototype`  listening TCP port 1234:
 Press Ctrl-C to stop.
 
 ```
-    make prototype-up
+    make prototype-up &
+    ./tools/client.sh
 ```
+
+
 
 ## Using with netcat
 
