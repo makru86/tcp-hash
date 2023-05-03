@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <boost/asio.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <boost/asio/static_thread_pool.hpp>
 #include <boost/test/unit_test.hpp>
 #include <compare>
+#include <csignal>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -98,10 +100,17 @@ private:
 };
 
 class server {
+  tcp::acceptor acceptor_;
+  tcp::socket socket_;
+  std::shared_ptr<asio::static_thread_pool> thread_pool_{
+      std::make_shared<asio::static_thread_pool>(1)};
+  asio::signal_set signals_;
+
 public:
   server(asio::io_context &io_context, short port)
       : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
-        socket_(io_context) {
+        socket_(io_context), signals_{io_context, SIGINT, SIGTERM} {
+    signals_.async_wait([&](auto, auto) { io_context.stop(); });
     do_accept();
   }
 
@@ -118,11 +127,6 @@ private:
       do_accept();
     });
   }
-
-  tcp::acceptor acceptor_;
-  tcp::socket socket_;
-  std::shared_ptr<asio::static_thread_pool> thread_pool_{
-      std::make_shared<asio::static_thread_pool>(1)};
 };
 
 BOOST_AUTO_TEST_SUITE(fffs)
