@@ -12,8 +12,10 @@
 #include <libtcp_hash/util.hpp>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 
+using namespace std::chrono_literals;
 using namespace libtcp_hash;
 
 namespace asio = boost::asio;
@@ -22,10 +24,11 @@ using asio::ip::tcp;
 using FSM = libtcp_hash::StatefulHasher<XxHash>;
 libtcp_hash::XxHash xxHash;
 FSM fsm{xxHash};
-asio::static_thread_pool static_thread_pool{1};
 
-template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
+template <typename OnHashCb>
+void process(std::string data, OnHashCb on_hash) {
   LOG_DEBUG("NN\n,received:" << data.size());
+//  std::this_thread::sleep_for(10s);
   auto &&on_token = [&](StrView token, bool final) {
     LOG_DEBUG("NN\nhashing:" << token.size() << "," << final);
     fsm.feed(token);
@@ -39,9 +42,15 @@ template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
 }
 
 class session : public std::enable_shared_from_this<session> {
+
+  tcp::socket socket_;
+  enum { max_length = 1024 };
+  char data_[max_length];
+  char write_data_[max_length];
+  asio::static_thread_pool &thread_pool_;
+
 public:
-  session(tcp::socket socket,
-          std::weak_ptr<asio::static_thread_pool> thread_pool)
+  session(tcp::socket socket, asio::static_thread_pool &thread_pool)
       : socket_(std::move(socket)), thread_pool_{thread_pool} {}
 
   void start() { do_read(); }
@@ -65,22 +74,20 @@ private:
   }
 
   static void async_process(std::string data,
-                            std::weak_ptr<asio::static_thread_pool> tp,
+                            asio::static_thread_pool &thread_pool,
                             std::shared_ptr<session> ses) {
-    if (auto thread_pool = tp.lock()) {
-      asio::post(*thread_pool, //
-                 [ses, thread_pool, data]() {
-                   if (ses->is_open()) {
-                     LOG_DEBUG("NN\nsession open");
-                     auto weak{std::weak_ptr<session>{ses}};
-                     process(data, //
-                             std::bind(&session::on_hash, weak,
-                                       std::placeholders::_1));
-                   } else {
-                     LOG_DEBUG("NN\nsession closed");
-                   }
-                 });
-    }
+
+    asio::post(
+        thread_pool, [ses = std::move(ses), data = std::move(data)]() mutable {
+          if (ses->is_open()) {
+            LOG_DEBUG("NN\nsession open");
+            auto weak{std::weak_ptr<session>{ses}};
+            process(std::move(data),
+                    std::bind(&session::on_hash, weak, std::placeholders::_1));
+          } else {
+            LOG_DEBUG("NN\nsession closed");
+          }
+        });
   }
 
   static void on_hash(std::weak_ptr<session> weak_self, std::string hash) {
@@ -97,6 +104,11 @@ private:
   }
 
   void do_write(std::size_t length) {
+    if (!is_open()) {
+      LOG_DEBUG("NN\nsession closed");
+      stop();
+      return;
+    }
     auto self(shared_from_this());
     LOG_DEBUG("NN\nsending:" << length);
     asio::async_write(socket_, asio::buffer(write_data_, length),
@@ -106,19 +118,14 @@ private:
                         }
                       });
   }
-
-  tcp::socket socket_;
-  enum { max_length = 1024 };
-  char data_[max_length];
-  char write_data_[max_length];
-  std::weak_ptr<asio::static_thread_pool> thread_pool_;
 };
 
 class server {
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  std::shared_ptr<asio::static_thread_pool> thread_pool_{
-      std::make_shared<asio::static_thread_pool>(1)};
+  asio::static_thread_pool thread_pool_{1};
+  asio::static_thread_pool thread_pool_2_{1};
+  size_t next_thread_{0};
   asio::signal_set signals_;
 
 public:
@@ -135,7 +142,7 @@ private:
       if (!ec) {
         std::make_shared<session>(
             std::move(socket_),
-            std::weak_ptr<asio::static_thread_pool>{thread_pool_})
+            (((next_thread_++ % 2) == 0) ? thread_pool_ : thread_pool_2_))
             ->start();
       }
 
@@ -149,6 +156,7 @@ BOOST_AUTO_TEST_SUITE(fffs)
 BOOST_AUTO_TEST_CASE(TokenizerTest) {
   try {
 
+    LOG_DEBUG("main");
     asio::io_context io_context;
 
     server server(io_context, 1234);

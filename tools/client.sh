@@ -8,7 +8,7 @@ if [ $# -gt 1 ]; then
 fi
 
 RUN_TIME="1"
-DATA_SIZE="512"
+DATA_SIZE="512K"
 CONNECT_PORT=${1:-1234}
 THIS_DIR=$(dirname "$0")
 
@@ -19,19 +19,16 @@ echo " CONNECT_PORT=$CONNECT_PORT"
 
 # function to run ncat
 function client_session() {
-  ( \
-  head -c${DATA_SIZE} /dev/random; \
-  sleep $RUN_TIME \
-) | \
-  ncat "0.0.0.0" $CONNECT_PORT $VERBOSITY --nodns | \
-  wc
+  head -c${DATA_SIZE} /dev/random |\
+  ncat "0.0.0.0" $CONNECT_PORT $VERBOSITY --nodns |\
+  wc -l
 }
 
 
 # spawn multiple clients repeatedly calling ncat,
 # then sleeping 500 ms, until RUN_TIME is over.
 
-for i in $(seq 1 2); do
+for i in $(seq 1 5); do
   { client_session; } &
 done;
 
