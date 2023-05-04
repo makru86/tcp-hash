@@ -22,14 +22,19 @@ function client_session() {
   head -c${DATA_SIZE} /dev/random |\
   ncat "0.0.0.0" $CONNECT_PORT $VERBOSITY --nodns |\
   wc -l
+  sleep 1
 }
-
 
 # spawn multiple clients repeatedly calling ncat,
 # then sleeping 500 ms, until RUN_TIME is over.
 
-for i in $(seq 1 5); do
-  { client_session; } &
-done;
+# sequencially
+for i in $(seq 1 4); do
 
+  # in parallel
+for j in $(seq 1 4); do
+    { client_session; } &
+  done;
+  wait
+done;
 wait

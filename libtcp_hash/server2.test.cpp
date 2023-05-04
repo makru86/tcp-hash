@@ -25,10 +25,11 @@ using FSM = libtcp_hash::StatefulHasher<XxHash>;
 libtcp_hash::XxHash xxHash;
 FSM fsm{xxHash};
 
-template <typename OnHashCb>
-void process(std::string data, OnHashCb on_hash) {
+template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
   LOG_DEBUG("NN\n,received:" << data.size());
-//  std::this_thread::sleep_for(10s);
+  LOG_DEBUG("NN\n,sleeping...");
+    std::this_thread::sleep_for(10s);
+  LOG_DEBUG("NN\n,woke up");
   auto &&on_token = [&](StrView token, bool final) {
     LOG_DEBUG("NN\nhashing:" << token.size() << "," << final);
     fsm.feed(token);
@@ -121,11 +122,15 @@ private:
 };
 
 class server {
+  struct single_thread_pool : asio::static_thread_pool {
+    single_thread_pool() : asio::static_thread_pool{1} {}
+  };
+
+  constexpr static auto thread_count_{3};
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  asio::static_thread_pool thread_pool_{1};
-  asio::static_thread_pool thread_pool_2_{1};
-  size_t next_thread_{0};
+  std::array<single_thread_pool, thread_count_> threads_{};
+  size_t session_number_{0};
   asio::signal_set signals_;
 
 public:
@@ -140,12 +145,10 @@ private:
   void do_accept() {
     acceptor_.async_accept(socket_, [this](std::error_code ec) {
       if (!ec) {
-        std::make_shared<session>(
-            std::move(socket_),
-            (((next_thread_++ % 2) == 0) ? thread_pool_ : thread_pool_2_))
-            ->start();
+        // Round robin algorigthm selecting thread for work.
+        auto index{session_number_++ % thread_count_};
+        std::make_shared<session>(std::move(socket_), threads_[index])->start();
       }
-
       do_accept();
     });
   }
