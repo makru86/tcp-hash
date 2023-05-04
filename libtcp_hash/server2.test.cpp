@@ -53,19 +53,25 @@ private:
         asio::buffer(data_, max_length),
         [this, self](std::error_code ec, std::size_t length) {
           if (!ec) {
-            if (auto thread_pool = thread_pool_.lock()) {
-              auto data{std::string{data_, length}};
-              asio::post(*thread_pool, //
-                         [self, thread_pool, data]() {
-                           auto weak{std::weak_ptr<session>{self}};
-                           process(data, //
-                                   std::bind(&session::on_hash, weak,
-                                             std::placeholders::_1));
-                         });
-            }
+            auto &&data{std::string{data_, length}};
+            async_process(data, thread_pool_, self);
             do_read();
           }
         });
+  }
+
+  static void async_process(std::string data,
+                            std::weak_ptr<asio::static_thread_pool> tp,
+                            std::shared_ptr<session> ses) {
+    if (auto thread_pool = tp.lock()) {
+      asio::post(
+          *thread_pool, //
+          [ses, thread_pool, data]() {
+            auto weak{std::weak_ptr<session>{ses}};
+            process(data, //
+                    std::bind(&session::on_hash, weak, std::placeholders::_1));
+          });
+    }
   }
 
   static void on_hash(std::weak_ptr<session> weak_self, std::string hash) {
