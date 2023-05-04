@@ -6,13 +6,25 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <streambuf>
 #include <string>
+#include <thread>
+
+inline char tid() {
+  static std::map<std::thread::id, char> names;
+  static char next_name{'A'};
+  auto tid{std::this_thread::get_id()};
+  if (!names.count(tid)) {
+    names[tid] = next_name++;
+  }
+  return names.at(tid);
+}
 
 #define TCP_HASH_LOG_MESSAGE(severity, msg)                                    \
   libtcp_hash::fixedFilledWidth(std::to_string(libtcp_hash::nanoSinceEpoch()), \
                                 10, '0')                                       \
-      << "_us " severity << " .."        \
+      << "_us " severity << " tid:" << tid() << " .."                          \
       << libtcp_hash::fixedFilledWidth(__FILE__, 16, ' ') << ":"               \
       << libtcp_hash::fixedFilledWidth(std::to_string(__LINE__), 3, '0')       \
       << " " << msg << std::endl

@@ -25,9 +25,9 @@ FSM fsm{xxHash};
 asio::static_thread_pool static_thread_pool{1};
 
 template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
-  LOG_DEBUG("NN\n,received:'" << data << "'," << data.size());
+  LOG_DEBUG("NN\n,received:" << data.size());
   auto &&on_token = [&](StrView token, bool final) {
-    LOG_DEBUG("NN\nhashing:'" << token << "'," << token.size() << "," << final);
+    LOG_DEBUG("NN\nhashing:" << token.size() << "," << final);
     fsm.feed(token);
     if (final) {
       HashValue hash = fsm.digest();
@@ -45,6 +45,10 @@ public:
       : socket_(std::move(socket)), thread_pool_{thread_pool} {}
 
   void start() { do_read(); }
+
+  bool is_open() const { return socket_.is_open(); }
+
+  void stop() { socket_.close(); }
 
 private:
   void do_read() {
@@ -64,13 +68,18 @@ private:
                             std::weak_ptr<asio::static_thread_pool> tp,
                             std::shared_ptr<session> ses) {
     if (auto thread_pool = tp.lock()) {
-      asio::post(
-          *thread_pool, //
-          [ses, thread_pool, data]() {
-            auto weak{std::weak_ptr<session>{ses}};
-            process(data, //
-                    std::bind(&session::on_hash, weak, std::placeholders::_1));
-          });
+      asio::post(*thread_pool, //
+                 [ses, thread_pool, data]() {
+                   if (ses->is_open()) {
+                     LOG_DEBUG("NN\nsession open");
+                     auto weak{std::weak_ptr<session>{ses}};
+                     process(data, //
+                             std::bind(&session::on_hash, weak,
+                                       std::placeholders::_1));
+                   } else {
+                     LOG_DEBUG("NN\nsession closed");
+                   }
+                 });
     }
   }
 
@@ -89,11 +98,11 @@ private:
 
   void do_write(std::size_t length) {
     auto self(shared_from_this());
-    LOG_DEBUG("NN\nsending:'" << std::string_view(write_data_, length) << "'");
+    LOG_DEBUG("NN\nsending:" << length);
     asio::async_write(socket_, asio::buffer(write_data_, length),
                       [this, self](std::error_code ec, std::size_t /*length*/) {
-                        if (!ec) {
-                          //                          do_read();
+                        if (ec) {
+                          self->stop();
                         }
                       });
   }
@@ -144,7 +153,12 @@ BOOST_AUTO_TEST_CASE(TokenizerTest) {
 
     server server(io_context, 1234);
 
+    //    std::thread t{[&](){
+    //      io_context.run();
+    //    }};
     io_context.run();
+    //    t.join();
+
   } catch (std::exception &e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
