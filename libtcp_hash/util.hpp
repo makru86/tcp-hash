@@ -30,10 +30,10 @@ inline char tid() {
       << " " << msg << std::endl
 
 /* LOG_DEBUG():
- * Enabled only for DEBUG build configuration.
+ * Enabled by CMake option ENABLE_DEBUG_LOG.
  * Outputs to STDOUT output stream.
  */
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG_LOG
 #define LOG_DEBUG(msg)                                                         \
   { std::cout << TCP_HASH_LOG_MESSAGE("DEBUG", msg); }
 #else
@@ -41,14 +41,12 @@ inline char tid() {
 #endif
 
 /* LOG_INFO():
- * Enabled for any build configuration.
  * Outputs to STDOUT output stream.
  */
 #define LOG_INFO(msg)                                                          \
   { std::cout << TCP_HASH_LOG_MESSAGE("INFO ", msg); }
 
 /* LOG_ERROR():
- * Enabled for any build configuration.
  * Outputs to STDERR output stream.
  */
 #define LOG_ERROR(msg)                                                         \
@@ -57,7 +55,6 @@ inline char tid() {
 /* TEST_TIMEOUT_SECS():
  * Specify maximum allowed time to run for a unit test.
  */
-
 #define TEST_TIMEOUT_SECS(seconds) *boost::unit_test::timeout(seconds)
 
 namespace libtcp_hash {

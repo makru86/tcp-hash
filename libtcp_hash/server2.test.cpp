@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/static_thread_pool.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/test/unit_test.hpp>
 #include <compare>
 #include <csignal>
@@ -12,6 +14,7 @@
 #include <libtcp_hash/util.hpp>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <thread>
 #include <utility>
 
@@ -27,9 +30,9 @@ FSM fsm{xxHash};
 
 template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
   LOG_DEBUG("NN\n,received:" << data.size());
-  LOG_DEBUG("NN\n,sleeping...");
-    std::this_thread::sleep_for(10s);
-  LOG_DEBUG("NN\n,woke up");
+//  LOG_DEBUG("NN\n,sleeping...");
+//  std::this_thread::sleep_for(10s);
+//  LOG_DEBUG("NN\n,woke up");
   auto &&on_token = [&](StrView token, bool final) {
     LOG_DEBUG("NN\nhashing:" << token.size() << "," << final);
     fsm.feed(token);
@@ -132,16 +135,32 @@ class server {
   std::array<single_thread_pool, thread_count_> threads_{};
   size_t session_number_{0};
   asio::signal_set signals_;
+  asio::steady_timer dump_metrics_timer_;
 
 public:
   server(asio::io_context &io_context, short port)
       : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
-        socket_(io_context), signals_{io_context, SIGINT, SIGTERM} {
+        socket_(io_context), signals_{io_context, SIGINT, SIGTERM},
+        dump_metrics_timer_(io_context) {
     signals_.async_wait([&](auto, auto) { io_context.stop(); });
+    dump_metrics();
     do_accept();
   }
 
 private:
+  constexpr static auto dump_metrics_delay_{5s};
+
+  void dump_metrics() {
+    LOG_DEBUG("NN\nDumping metrics");
+    dump_metrics_timer_.expires_after(dump_metrics_delay_);
+    dump_metrics_timer_.async_wait([this](std::error_code ec) {
+      if (ec) {
+        return;
+      }
+      dump_metrics();
+    });
+  }
+
   void do_accept() {
     acceptor_.async_accept(socket_, [this](std::error_code ec) {
       if (!ec) {

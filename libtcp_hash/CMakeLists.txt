@@ -4,10 +4,12 @@ target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
         Threads::Threads
+        xxHash::xxHash
         coverage_config
         coroutine_config
-        xxHash::xxHash
-        asio_config
+        asio_tracking_config
+        debug_log_config
+        gprof_config
         )
 
 function(create_test testname)

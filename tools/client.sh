@@ -32,9 +32,10 @@ function client_session() {
 for i in $(seq 1 4); do
 
   # in parallel
-for j in $(seq 1 4); do
+  for j in $(seq 1 5); do
     { client_session; } &
   done;
   wait
+
 done;
 wait
