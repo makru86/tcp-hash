@@ -4,7 +4,7 @@
 -include .env
 export
 
-all: build formatted
+all: formatted build
 
 configure:
 	cmake \

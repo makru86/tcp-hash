@@ -52,7 +52,7 @@ void tokenizer(StrView input, OnChunkCb onChunkCb) {
  * Due to XXH64_ implementation, this class is thread-unsafe and must be created
  * and used on same thread only.
  */
-class XxHash {
+class XxHash : NonCopyable {
   XXH64_state_t *xxCtx_;
   XXH64_hash_t xxHash_;
   static constexpr size_t seed_ = 0;
@@ -133,7 +133,7 @@ public:
   FsmState state() const { return state_; };
 };
 
-class Hasher {
+class Hasher : public NonCopyable {
 
   XxHash xxHash;
   StatefulHasher<XxHash> fsm{xxHash};

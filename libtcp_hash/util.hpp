@@ -108,4 +108,11 @@ template <typename T> std::string weakPtrDebugInfo(std::weak_ptr<T> weakPtr) {
   return ss.str();
 }
 
+struct NonCopyable {
+  NonCopyable() = default;
+  ~NonCopyable() = default;
+  NonCopyable(NonCopyable const &) = delete;
+  NonCopyable &operator=(NonCopyable const &) = delete;
+};
+
 } // namespace libtcp_hash
