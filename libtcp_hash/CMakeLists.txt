@@ -1,10 +1,24 @@
-add_library(libtcp_hash STATIC hash.cpp hash.hpp server.tpp server.hpp util.cpp util.hpp
-        handler_allocator.hpp client.hpp client.cpp server2.hpp)
+# glob all .cpp and .hpp files excluding test.cpp
+set(LIBRARY_SOURCES
+        hash.cpp
+        hash.hpp
+        server.tpp
+        server.hpp
+        util.cpp
+        util.hpp
+        handler_allocator.hpp
+        client.hpp
+        client.cpp
+        server2.hpp
+        )
+
+add_library(libtcp_hash STATIC ${LIBRARY_SOURCES})
 target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
         Boost::system
         Threads::Threads
         xxHash::xxHash
+        # Library configuration options:
         coverage_config
         coroutine_config
         asio_tracking_config
@@ -13,30 +27,47 @@ target_link_libraries(libtcp_hash PUBLIC
         )
 
 function(create_test testname)
-    add_executable(test_${testname} main.test.cpp ${testname}.test.cpp)
+    add_executable(test_${testname}
+            main.test.cpp
+            ${testname}.test.cpp
+            )
     target_link_libraries(test_${testname} PRIVATE
             libtcp_hash
-            ${Boost_LIBRARIES})
+            ${Boost_LIBRARIES}
+            )
     add_test(NAME test_${testname}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_${testname})
 endfunction()
 
-if (BUILD_UNIT_TESTS)
-    find_package(Boost REQUIRED COMPONENTS unit_test_framework)
-    enable_testing()
-    create_test("util")
-    create_test("hash")
-#    create_test("server")
-    create_test("server2")
-endif ()
-
-if (BUILD_LOAD_TESTS)
-    find_package(benchmark REQUIRED)
-    add_executable(loadtest main.loadtest.cpp hash.loadtest.cpp server.loadtest.cpp)
-    target_link_libraries(loadtest PRIVATE
+function(create_loadtest testname)
+    add_executable(loadtest_${testname}
+            ${testname}.loadtest.cpp
+            #            main.test.cpp
+            #            main.loadtest.cpp
+            )
+    target_link_libraries(loadtest_${testname} PRIVATE
             benchmark::benchmark
             benchmark::benchmark_main
+            libtcp_hash
             ${Boost_LIBRARIES}
-            libtcp_hash)
+            )
+    add_test(NAME loadtest_${testname}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMAND ${CMAKE_CURRENT_BINARY_DIR}/loadtest_${testname})
+
+endfunction()
+
+if (BUILD_TESTS)
+    find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+    find_package(benchmark REQUIRED)
+    enable_testing()
+
+    # Unit tests
+    create_test("util")
+    create_test("hash")
+    create_test("server2")
+
+    # Load test
+    create_loadtest("server")
 endif ()

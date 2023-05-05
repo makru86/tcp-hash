@@ -24,9 +24,9 @@ services:
         && cmake -B build -S .
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Debug}
-        -DBUILD_UNIT_TESTS=${BUILD_UNIT_TESTS:-ON}
-        -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-OFF}
-        -DCODE_COVERAGE=${CODE_COVERAGE:-ON}
+        -DBUILD_TESTS=${BUILD_TESTS:-ON}
+        -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
+        -DENABLE_DEBUG_LOG=ON
         &&
         echo Building project ${BUILD_TYPE:-Debug}...
         && cmake --build build --target all -- -j4
@@ -39,8 +39,7 @@ services:
         && cmake -B build -S .
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         -DCMAKE_BUILD_TYPE=Release
-        -DBUILD_UNIT_TESTS=${BUILD_UNIT_TESTS:-OFF}
-        -DBUILD_LOAD_TESTS=${BUILD_LOAD_TESTS:-ON}
+        -DBUILD_TESTS=${BUILD_TESTS:-ON}
         -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
         &&
         echo Building project Release...
