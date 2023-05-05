@@ -27,7 +27,7 @@ inline char tid() {
       << "_us " severity << " tid:" << tid() << " .."                          \
       << libtcp_hash::fixedFilledWidth(__FILE__, 16, ' ') << ":"               \
       << libtcp_hash::fixedFilledWidth(std::to_string(__LINE__), 3, '0')       \
-      << " " << msg << std::endl
+      << std::string(" ") << msg << std::endl
 
 /* LOG_DEBUG():
  * Enabled by CMake option ENABLE_DEBUG_LOG.

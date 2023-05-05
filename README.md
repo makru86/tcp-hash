@@ -64,7 +64,7 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 ### Formatting code, clang-tidy
 
 ```
-    make format-code
+    make formatted
     make tidy-code
 ```
 

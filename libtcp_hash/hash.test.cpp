@@ -6,6 +6,23 @@
 
 namespace libtcp_hash {
 
+class FastHexString {
+  static constexpr auto buf_size_{16};
+  std::array<char, buf_size_ + 1> buffer;
+  char const *const digitsHex = "0123456789abcdef";
+
+public:
+  constexpr auto size() const { return buf_size_; }
+  const char *operator()(uint64_t value) {
+    auto p = buffer.end();
+    do {
+      *--p = digitsHex[value & 0xF];
+      value >>= 4;
+    } while (value);
+    return p;
+  }
+};
+
 struct OnChunkCbArgs {
   StrView charArray_;
   bool separatorFound_;
@@ -135,6 +152,17 @@ BOOST_AUTO_TEST_CASE(FsmXxHashTokenizerTest) {
                 expected.pop_front();
               }
             });
+}
+
+// fast integer to hex string convertor
+// https://stackoverflow.com/a/5100748/84283
+BOOST_AUTO_TEST_CASE(FastHexStringTest) {
+  FastHexString to_hex_str;
+
+  BOOST_TEST(std::string("0000000000000000") == to_hex_str(0));
+  BOOST_TEST(std::string("0000000000000001") == to_hex_str(1));
+  BOOST_TEST(std::string("123456789abcdef0") == to_hex_str(0x123456789ABCDEF0));
+  BOOST_TEST(std::string("0000000000000002") == to_hex_str(2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

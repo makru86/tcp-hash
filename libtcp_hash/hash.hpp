@@ -3,6 +3,7 @@
 #include "xxhash.h"
 #include <cassert>
 #include <functional>
+#include <libtcp_hash/util.hpp>
 #include <mutex>
 #include <ostream>
 
@@ -130,6 +131,28 @@ public:
   }
 
   FsmState state() const { return state_; };
+};
+
+class Hasher {
+
+  XxHash xxHash;
+  StatefulHasher<XxHash> fsm{xxHash};
+
+public:
+  template <typename OnHashCb>
+  void process(std::string data, OnHashCb on_hash) {
+    //      LOG_DEBUG(std::string("data:") << data.size() << "B");
+    libtcp_hash::tokenizer(data, [&](StrView token, bool final) {
+      LOG_DEBUG("token:" << token.size() << "B," << final);
+      fsm.feed(token);
+      if (final) {
+        HashValue hash = fsm.digest();
+        std::string hash_str = to_hex_str(hash) + '\n';
+        LOG_DEBUG("hash:" << hash << "," << hash_str);
+        on_hash(std::move(hash_str));
+      }
+    });
+  }
 };
 
 } // namespace libtcp_hash

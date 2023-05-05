@@ -1,10 +1,10 @@
-.PHONY: build configure format-code loadtest coverage-report
+.PHONY: build configure formatted loadtest coverage-report
 
 # optionally include .env file
 -include .env
 export
 
-all: build
+all: build formatted
 
 configure:
 	cmake \
@@ -36,8 +36,12 @@ clean:
 #
 # down:
 # 	@docker-compose down --remove-orphans
-#
-# format-code:
+
+
+formatted:
+	@find tcp_hash libtcp_hash -name \*pp | xargs clang-format -i
+
+# formatted:
 # 	@docker-compose run builder bash -c \
 # 		"find tcp_hash libtcp_hash -name \*.cpp -or -name \*.h | xargs clang-format -i"
 #

@@ -18,44 +18,41 @@
 #include <thread>
 #include <utility>
 
+namespace libtcp_hash {
+
 using namespace std::chrono_literals;
 using namespace libtcp_hash;
 
 namespace asio = boost::asio;
 using asio::ip::tcp;
 
-using FSM = libtcp_hash::StatefulHasher<XxHash>;
-libtcp_hash::XxHash xxHash;
-FSM fsm{xxHash};
-
-template <typename OnHashCb> void process(std::string data, OnHashCb on_hash) {
-  LOG_DEBUG("NN\n,received:" << data.size());
-//  LOG_DEBUG("NN\n,sleeping...");
-//  std::this_thread::sleep_for(10s);
-//  LOG_DEBUG("NN\n,woke up");
-  auto &&on_token = [&](StrView token, bool final) {
-    LOG_DEBUG("NN\nhashing:" << token.size() << "," << final);
-    fsm.feed(token);
-    if (final) {
-      HashValue hash = fsm.digest();
-      std::string hash_str = to_hex_str(hash) + '\n';
-      on_hash(std::move(hash_str));
-    }
-  };
-  libtcp_hash::tokenizer(data, on_token);
-}
-
-class session : public std::enable_shared_from_this<session> {
+template <class HasherType>
+class Session : public std::enable_shared_from_this<Session<HasherType>> {
 
   tcp::socket socket_;
   enum { max_length = 1024 };
   char data_[max_length];
   char write_data_[max_length];
   asio::static_thread_pool &thread_pool_;
+  std::unique_ptr<HasherType> hasher_;
 
 public:
-  session(tcp::socket socket, asio::static_thread_pool &thread_pool)
-      : socket_(std::move(socket)), thread_pool_{thread_pool} {}
+  using Self = Session<HasherType>;
+  using Ptr = std::shared_ptr<Self>;
+
+private:
+  Session(tcp::socket socket, asio::static_thread_pool &thread_pool,
+          std::unique_ptr<HasherType> &&hasher)
+      : socket_(std::move(socket)),
+        thread_pool_{thread_pool}, hasher_{std::move(hasher)} {}
+
+public:
+  [[nodiscard]] static Ptr create(tcp::socket socket,
+                                  asio::static_thread_pool &thread_pool,
+                                  std::unique_ptr<HasherType> &&hasher) {
+    // Not using std::make_shared<> because the c'tor is private.
+    return Ptr{new Self{std::move(socket), thread_pool, std::move(hasher)}};
+  }
 
   void start() { do_read(); }
 
@@ -64,8 +61,10 @@ public:
   void stop() { socket_.close(); }
 
 private:
+  Ptr get_shared_from_this() { return this->shared_from_this(); };
+
   void do_read() {
-    auto self(shared_from_this());
+    auto self(get_shared_from_this());
     socket_.async_read_some(
         asio::buffer(data_, max_length),
         [this, self](std::error_code ec, std::size_t length) {
@@ -79,22 +78,23 @@ private:
 
   static void async_process(std::string data,
                             asio::static_thread_pool &thread_pool,
-                            std::shared_ptr<session> ses) {
+                            std::shared_ptr<Session> ses) {
 
     asio::post(
         thread_pool, [ses = std::move(ses), data = std::move(data)]() mutable {
           if (ses->is_open()) {
-            LOG_DEBUG("NN\nsession open");
-            auto weak{std::weak_ptr<session>{ses}};
-            process(std::move(data),
-                    std::bind(&session::on_hash, weak, std::placeholders::_1));
+            auto session_weak_ptr{std::weak_ptr<Session>{ses}};
+
+            ses->hasher_->process(std::move(data),
+                                  std::bind(&Session::on_hash, session_weak_ptr,
+                                            std::placeholders::_1));
           } else {
             LOG_DEBUG("NN\nsession closed");
           }
         });
   }
 
-  static void on_hash(std::weak_ptr<session> weak_self, std::string hash) {
+  static void on_hash(std::weak_ptr<Session> weak_self, std::string hash) {
     auto self{weak_self.lock()};
     if (self) {
       self->write(hash);
@@ -113,7 +113,7 @@ private:
       stop();
       return;
     }
-    auto self(shared_from_this());
+    auto self(get_shared_from_this());
     LOG_DEBUG("NN\nsending:" << length);
     asio::async_write(socket_, asio::buffer(write_data_, length),
                       [this, self](std::error_code ec, std::size_t /*length*/) {
@@ -166,18 +166,23 @@ private:
       if (!ec) {
         // Round robin algorigthm selecting thread for work.
         auto index{session_number_++ % thread_count_};
-        std::make_shared<session>(std::move(socket_), threads_[index])->start();
+
+        Session<Hasher>::create(std::move(socket_), threads_[index],
+                                std::make_unique<Hasher>())
+            ->start();
       }
       do_accept();
     });
   }
 };
 
+} // namespace libtcp_hash
 BOOST_AUTO_TEST_SUITE(fffs)
 
 BOOST_AUTO_TEST_CASE(TokenizerTest) {
   try {
 
+    using namespace libtcp_hash;
     LOG_DEBUG("main");
     asio::io_context io_context;
 
