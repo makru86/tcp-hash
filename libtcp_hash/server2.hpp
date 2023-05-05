@@ -108,7 +108,7 @@ private:
   }
 };
 
-class server {
+template <class Hasher> class Server {
   struct single_thread_pool : asio::static_thread_pool {
     single_thread_pool() : asio::static_thread_pool{1} {}
   };
@@ -120,12 +120,14 @@ class server {
   size_t session_number_{0};
   asio::signal_set signals_;
   asio::steady_timer dump_metrics_timer_;
+  std::unique_ptr<Hasher> hasher_;
 
 public:
-  server(asio::io_context &io_context, short port)
+  Server(asio::io_context &io_context, short port,
+         std::unique_ptr<Hasher> &&hasher)
       : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
         socket_(io_context), signals_{io_context, SIGINT, SIGTERM},
-        dump_metrics_timer_(io_context) {
+        dump_metrics_timer_(io_context), hasher_{std::move(hasher)} {
     signals_.async_wait([&](auto, auto) { io_context.stop(); });
     dump_metrics();
     do_accept();
@@ -152,7 +154,7 @@ private:
         auto index{session_number_++ % thread_count_};
 
         Session<Hasher>::create(std::move(socket_), threads_[index],
-                                std::make_unique<Hasher>())
+                                hasher_->clone())
             ->start();
       }
       do_accept();

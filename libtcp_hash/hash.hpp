@@ -139,6 +139,10 @@ class Hasher : public NonCopyable {
   StatefulHasher<XxHash> fsm{xxHash};
 
 public:
+  using UPtr = std::unique_ptr<Hasher>;
+
+  UPtr clone() { return std::make_unique<Hasher>(); }
+
   template <typename OnHashCb>
   void process(std::string data, OnHashCb on_hash) {
     //      LOG_DEBUG(std::string("data:") << data.size() << "B");

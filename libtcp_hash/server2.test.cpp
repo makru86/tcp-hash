@@ -32,7 +32,8 @@ BOOST_AUTO_TEST_CASE(TokenizerTest) {
     LOG_DEBUG("main");
     asio::io_context io_context;
 
-    server server(io_context, 1234);
+    auto hasher = std::make_unique<Hasher>();
+    Server server(io_context, 1234, std::move(hasher));
 
     //    std::thread t{[&](){
     //      io_context.run();
