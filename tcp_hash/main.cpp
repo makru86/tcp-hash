@@ -2,7 +2,7 @@
 #include <condition_variable>
 #include <csignal>
 #include <iostream>
-#include <libtcp_hash/server.hpp>
+#include <libtcp_hash/server2.hpp>
 
 using namespace libtcp_hash;
 using namespace boost::asio;
