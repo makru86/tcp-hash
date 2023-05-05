@@ -1,15 +1,13 @@
 # glob all .cpp and .hpp files excluding test.cpp
 set(LIBRARY_SOURCES
+        client.cpp
+        client.hpp
+        handler_allocator.hpp
         hash.cpp
         hash.hpp
-        server.tpp
-        server.hpp
+        server2.hpp
         util.cpp
         util.hpp
-        handler_allocator.hpp
-        client.hpp
-        client.cpp
-        server2.hpp
         )
 
 add_library(libtcp_hash STATIC ${LIBRARY_SOURCES})
