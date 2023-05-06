@@ -19,7 +19,7 @@ class Session : public std::enable_shared_from_this<Session<HasherType>> {
   char data_[max_length];
   char write_data_[max_length];
   asio::static_thread_pool &thread_pool_;
-  std::unique_ptr<HasherType> hasher_;
+  std::shared_ptr<HasherType> hasher_;
 
 public:
   using Self = Session<HasherType>;
@@ -27,14 +27,14 @@ public:
 
 private:
   Session(tcp::socket socket, asio::static_thread_pool &thread_pool,
-          std::unique_ptr<HasherType> &&hasher)
-      : socket_(std::move(socket)),
-        thread_pool_{thread_pool}, hasher_{std::move(hasher)} {}
+          std::shared_ptr<HasherType> hasher)
+      : socket_(std::move(socket)), thread_pool_{thread_pool}, hasher_{hasher} {
+  }
 
 public:
   [[nodiscard]] static Ptr create(tcp::socket socket,
                                   asio::static_thread_pool &thread_pool,
-                                  std::unique_ptr<HasherType> &&hasher) {
+                                  std::shared_ptr<HasherType> hasher) {
     // Not using std::make_shared<> because the c'tor is private.
     return Ptr{new Self{std::move(socket), thread_pool, std::move(hasher)}};
   }
@@ -114,21 +114,24 @@ template <class Hasher> class Server {
     single_thread_pool() : asio::static_thread_pool{1} {}
   };
 
+public:
   constexpr static auto thread_count_{3};
+
+private:
   tcp::acceptor acceptor_;
   tcp::socket socket_;
   std::array<single_thread_pool, thread_count_> threads_{};
   size_t session_number_{0};
   asio::signal_set signals_;
   asio::steady_timer dump_metrics_timer_;
-  std::unique_ptr<Hasher> hasher_;
+  std::shared_ptr<Hasher> hasher_;
 
 public:
   Server(asio::io_context &io_context, short port,
-         std::unique_ptr<Hasher> &&hasher)
+         std::shared_ptr<Hasher> hasher)
       : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
         socket_(io_context), signals_{io_context, SIGINT, SIGTERM},
-        dump_metrics_timer_(io_context), hasher_{std::move(hasher)} {
+        dump_metrics_timer_(io_context), hasher_{hasher} {
     signals_.async_wait([&](auto, auto) { io_context.stop(); });
     dump_metrics();
     do_accept();
@@ -166,7 +169,7 @@ private:
         auto index{session_number_++ % thread_count_};
 
         Session<Hasher>::create(std::move(socket_), threads_[index],
-                                hasher_->clone())
+                                hasher_->create())
             ->start();
       }
       do_accept();
