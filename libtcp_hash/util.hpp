@@ -52,11 +52,6 @@ inline char tid() {
 #define LOG_ERROR(msg)                                                         \
   { std::cerr << TCP_HASH_LOG_MESSAGE("ERROR", msg); }
 
-/* TEST_TIMEOUT_SECS():
- * Specify maximum allowed time to run for a unit test.
- */
-#define TEST_TIMEOUT_SECS(seconds) *boost::unit_test::timeout(seconds)
-
 namespace libtcp_hash {
 
 /* getEnvOrValue():

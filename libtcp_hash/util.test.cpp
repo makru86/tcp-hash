@@ -5,7 +5,7 @@
 using namespace libtcp_hash;
 using namespace std::chrono;
 namespace {
-BOOST_AUTO_TEST_SUITE(UtilTests, TEST_TIMEOUT_SECS(16))
+BOOST_AUTO_TEST_SUITE(UtilTests)
 
 BOOST_AUTO_TEST_CASE(NanoSinceEpochTest) {
   // Test nanoSinceEpoch() with allowed delta 3'000 nanoseconds

@@ -2,15 +2,16 @@
 #include <condition_variable>
 #include <csignal>
 #include <iostream>
+#include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/server.hpp>
 
 using namespace libtcp_hash;
 using namespace boost::asio;
 
 int main() {
-  io_service io;
-  ip::tcp::endpoint endpoint(ip::tcp::v4(), 1234);
-  signal_set signals(io, SIGINT, SIGTERM);
-  signals.async_wait([&](auto, auto) { io.stop(); });
-  return 0;
+  auto hasher = std::make_shared<Hasher>();
+  asio::io_context io_context;
+  Server server(io_context, 1234, hasher);
+  io_context.run();
+  server.stop();
 }

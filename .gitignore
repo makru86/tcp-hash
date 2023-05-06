@@ -36,3 +36,4 @@ cmake-build-debug-docker
 .idea
 cmake-build-*
 tags
+build-release

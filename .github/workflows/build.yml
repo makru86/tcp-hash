@@ -18,13 +18,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Docker Compose Up
-        run: docker-compose up
+      - name: Build Debug and test
+        run: make docker-test
 
       - name: Coverage Docker Compose Up
         run: env BUILD_TESTS=ON CODE_COVERAGE=ON docker-compose up --remove-orphans --build --force-recreate builder
       - name: Coverage gcno Files
-        run: make coverage-report
+        run: make docker-coverage
 
 # TODO Step disabled because it fails. https://github.com/makru86/tcp-hash/actions/runs/4778413208/jobs/8494819514
 #      - name: Coverage Github Badge

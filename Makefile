@@ -1,4 +1,6 @@
-.PHONY: build configure formatted loadtest coverage-report
+.PHONY: build configure format coverage test serve docker-serve docker-test
+
+MAKEFLAGS += --always-make
 
 # optionally include .env file
 -include .env
@@ -7,7 +9,7 @@ export
 all: formatted build
 
 configure:
-	cmake \
+	@cmake \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_MAKE_PROGRAM=ninja \
 		-DCMAKE_C_COMPILER=clang \
@@ -15,21 +17,41 @@ configure:
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DBUILD_TESTS=ON \
 		-DCODE_COVERAGE=OFF \
-		-DASIO_ENABLE_HANDLER_TRACKING=ON \
+		-DASIO_ENABLE_HANDLER_TRACKING=OFF \
 		-DENABLE_GPROF_PROFILING=OFF \
 		-DENABLE_DEBUG_LOG=ON \
 		-G Ninja \
 		-S . \
 		-B build
 
-build:
-	cmake --build build -- -j 2
+configure-release:
+	@cmake \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_MAKE_PROGRAM=ninja \
+		-DCMAKE_C_COMPILER=clang \
+		-DCMAKE_CXX_COMPILER=clang++ \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		-DBUILD_TESTS=ON \
+		-DCODE_COVERAGE=OFF \
+		-DASIO_ENABLE_HANDLER_TRACKING=OFF \
+		-DENABLE_GPROF_PROFILING=OFF \
+		-DENABLE_DEBUG_LOG=OFF \
+		-G Ninja \
+		-S . \
+		-B release
+
+
+build: configure
+	@cmake --build build -- -j 2
+
+build-release: configure-release
+	@cmake --build release -- -j 2
 
 test:
-	ctest --test-dir build --output-on-failure
+	@ctest --test-dir build/libtcp_hash --output-on-failure
 
 clean:
-	rm -r build
+	@rm -rf build release
 
 # up:
 # 	@docker-compose up builder --force-recreate --remove-orphans  --build
@@ -37,12 +59,19 @@ clean:
 # down:
 # 	@docker-compose down --remove-orphans
 
-
 formatted:
 	@find tcp_hash libtcp_hash -name \*pp | xargs clang-format -i
 
+serve: build-release
+	@./release/tcp_hash/tcp_hash
+
+docker-test:
+	@docker-compose run builder bash -c "make test"
+
+docker-serve:
+	@docker-compose run builder bash -c "make serve"
+
 # formatted:
-# 	@docker-compose run builder bash -c \
 # 		"find tcp_hash libtcp_hash -name \*.cpp -or -name \*.h | xargs clang-format -i"
 #
 # tidy-code:

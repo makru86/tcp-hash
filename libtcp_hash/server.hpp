@@ -74,7 +74,7 @@ private:
                                   std::bind(&Session::on_hash, session_weak_ptr,
                                             std::placeholders::_1));
           } else {
-            LOG_DEBUG("NN\nsession closed");
+            LOG_DEBUG("session closed");
           }
         });
   }
@@ -94,12 +94,12 @@ private:
 
   void do_write(std::size_t length) {
     if (!is_open()) {
-      LOG_DEBUG("NN\nsession closed");
+      LOG_DEBUG("session closed");
       stop();
       return;
     }
     auto self(get_shared_from_this());
-    LOG_DEBUG("NN\nsending:" << length);
+    LOG_DEBUG("sending:" << length);
     asio::async_write(socket_, asio::buffer(write_data_, length),
                       [this, self](std::error_code ec, std::size_t /*length*/) {
                         if (ec) {
@@ -152,7 +152,7 @@ private:
   constexpr static auto dump_metrics_delay_{5s};
 
   void dump_metrics() {
-    LOG_DEBUG("NN\nDumping metrics");
+    LOG_DEBUG("Dumping metrics");
     dump_metrics_timer_.expires_after(dump_metrics_delay_);
     dump_metrics_timer_.async_wait([this](std::error_code ec) {
       if (ec) {

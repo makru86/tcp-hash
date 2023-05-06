@@ -13,7 +13,7 @@ set(LIBRARY_SOURCES
 add_library(libtcp_hash STATIC ${LIBRARY_SOURCES})
 target_include_directories(libtcp_hash PUBLIC "${CMAKE_SOURCE_DIR}")
 target_link_libraries(libtcp_hash PUBLIC
-        Boost::system
+            ${Boost_LIBRARIES}
         Threads::Threads
         xxHash::xxHash
         # Library configuration options:
@@ -41,14 +41,11 @@ endfunction()
 function(create_loadtest testname)
     add_executable(loadtest_${testname}
             ${testname}.loadtest.cpp
-            #            main.test.cpp
-            #            main.loadtest.cpp
             )
     target_link_libraries(loadtest_${testname} PRIVATE
             benchmark::benchmark
             benchmark::benchmark_main
             libtcp_hash
-            ${Boost_LIBRARIES}
             )
     add_test(NAME loadtest_${testname}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -57,7 +54,6 @@ function(create_loadtest testname)
 endfunction()
 
 if (BUILD_TESTS)
-    find_package(Boost REQUIRED COMPONENTS unit_test_framework)
     find_package(benchmark REQUIRED)
     enable_testing()
 

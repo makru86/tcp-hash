@@ -16,7 +16,7 @@ message(STATUS "Enable Gprof profiling: ${ENABLE_GPROF_PROFILING}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system unit_test_framework)
 find_package(xxHash REQUIRED)
 
 # TODO refactor C++ sources to use coroutines instead of callbacks
