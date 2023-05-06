@@ -146,29 +146,30 @@ private:
       return;
     }
     LOG_DEBUG("connected");
-    boost::system::error_code set_option_err;
-    asio::ip::tcp::no_delay no_delay(true);
-    socket_.set_option(no_delay, set_option_err);
-    if (!set_option_err) {
-      ++unwritten_count_;
-      async_write(socket_, asio::buffer(write_data_, block_size_),
-                  asio::bind_executor(
-                      strand_,
-                      make_custom_alloc_handler(
-                          write_allocator_,
-                          boost::bind(&session::handle_write, this,
-                                      asio::placeholders::error,
-                                      asio::placeholders::bytes_transferred))));
-      socket_.async_read_some(
-          asio::buffer(read_data_, block_size_),
-          asio::bind_executor(
-              strand_,
-              make_custom_alloc_handler(
-                  read_allocator_,
-                  boost::bind(&session::handle_read, this,
-                              asio::placeholders::error,
-                              asio::placeholders::bytes_transferred))));
+
+    {
+      boost::system::error_code err1;
+      socket_.set_option(asio::ip::tcp::no_delay{true}, err1);
+      LOG_DEBUG("set TCP no_delay: " << err1);
     }
+
+    ++unwritten_count_;
+    async_write(
+        socket_, asio::buffer(write_data_, block_size_),
+        asio::bind_executor(
+            strand_, make_custom_alloc_handler(
+                         write_allocator_,
+                         boost::bind(&session::handle_write, this,
+                                     asio::placeholders::error,
+                                     asio::placeholders::bytes_transferred))));
+    socket_.async_read_some(
+        asio::buffer(read_data_, block_size_),
+        asio::bind_executor(
+            strand_, make_custom_alloc_handler(
+                         read_allocator_,
+                         boost::bind(&session::handle_read, this,
+                                     asio::placeholders::error,
+                                     asio::placeholders::bytes_transferred))));
   }
 
   void handle_read(const boost::system::error_code &err, size_t length) {
@@ -188,12 +189,6 @@ private:
                   }
                 });
 
-      //       for (auto it{0}; it != read_data_length_; ++it) {
-      //         if (read_data_[it] == '\n') {
-      //           stats_.addMessage();
-      //         }
-      //       }
-      //
       std::swap(read_data_, write_data_);
       async_write(socket_, asio::buffer(write_data_, read_data_length_),
                   asio::bind_executor(
@@ -267,22 +262,23 @@ class TcpHashClient {
   LoadtestMetrics &stats_;
 
 public:
-  struct ErrorResolvingName : std::runtime_error {
-    ErrorResolvingName() : std::runtime_error{"ErrorResolvingName"} {}
+  struct ErrorDNS : std::runtime_error {
+    ErrorDNS() : std::runtime_error{"ErrorDNS"} {}
   };
 
   TcpHashClient(asio::io_context &ioc, const asio::ip::tcp::endpoint &endpoint,
                 size_t block_size, size_t session_count, int timeout,
                 LoadtestMetrics &stats) noexcept(false)
-      : io_context_(ioc), stop_timer_(ioc), stats_{stats} //
-  {
-    stop_timer_.expires_after(asio::chrono::seconds(timeout));
-    stop_timer_.async_wait(boost::bind(&TcpHashClient::handle_timeout, this));
+      : io_context_(ioc), stop_timer_(ioc), stats_{stats} {
+    if (timeout > 0) {
+      stop_timer_.expires_after(asio::chrono::seconds(timeout));
+      stop_timer_.async_wait(boost::bind(&TcpHashClient::stop, this));
+    }
 
     auto resolver{asio::ip::tcp::resolver{io_context_}};
     auto endpoints{resolver.resolve(endpoint)};
     if (endpoints.empty()) {
-      throw ErrorResolvingName{};
+      throw ErrorDNS{};
     }
 
     for (size_t i = 0; i < session_count; ++i) {
@@ -299,7 +295,7 @@ public:
     }
   }
 
-  void handle_timeout() {
+  void stop() {
     std::for_each(sessions_.begin(), sessions_.end(),
                   boost::mem_fn(&session::stop));
   }

@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/system/detail/error_code.hpp>
 #include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/util.hpp>
 
@@ -131,6 +132,17 @@ public:
     signals_.async_wait([&](auto, auto) { io_context.stop(); });
     dump_metrics();
     do_accept();
+  }
+
+  void stop() {
+    boost::system::error_code ec;
+    acceptor_.cancel(ec);
+    LOG_DEBUG("stop:cancel=" << ec);
+    acceptor_.close(ec);
+    LOG_DEBUG("stop:close=" << ec);
+    for (auto &thread_pool : threads_) {
+      thread_pool.stop();
+    }
   }
 
 private:
