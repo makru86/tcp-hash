@@ -5,7 +5,7 @@ set(LIBRARY_SOURCES
         handler_allocator.hpp
         hash.cpp
         hash.hpp
-        server2.hpp
+        server.hpp
         util.cpp
         util.hpp
         )
@@ -64,7 +64,7 @@ if (BUILD_TESTS)
     # Unit tests
     create_test("util")
     create_test("hash")
-    create_test("server2")
+    create_test("server")
 
     # Load test
     create_loadtest("server")
