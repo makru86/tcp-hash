@@ -30,26 +30,6 @@ services:
         &&
         echo Building project ${BUILD_TYPE:-Debug}...
         && cmake --build build --target all -- -j4
-        &&
-        echo Running unit tests...
-        && cd build/libtcp_hash && ctest -VV && cd ../..
-        &&
-        echo Configuring CMake project Release...
-        && rm -rf build
-        && cmake -B build -S .
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        -DCMAKE_BUILD_TYPE=Release
-        -DBUILD_TESTS=${BUILD_TESTS:-ON}
-        -DCODE_COVERAGE=${CODE_COVERAGE:-OFF}
-        &&
-        echo Building project Release...
-        && cmake --build build --target all -- -j4
-        &&
-        echo Running benchmark...
-        && ./build/libtcp_hash/loadtest
-        &&
-        echo Starting tcp_hash...
-        && echo TODO
 
 volumes:
 

@@ -42,3 +42,5 @@ void serverLoadtest() {
 
   LOG_INFO(testMetrics.makeReport());
 }
+
+int main() { serverLoadtest(); }

@@ -3,12 +3,7 @@
 
 #include <algorithm>
 #include <boost/asio.hpp>
-#include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/signal_set.hpp>
-#include <boost/asio/static_thread_pool.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/test/unit_test.hpp>
-#include <compare>
 #include <csignal>
 #include <cstdlib>
 #include <iomanip>

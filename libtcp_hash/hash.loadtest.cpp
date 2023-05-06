@@ -55,3 +55,5 @@ void hashLoadtest() {
   testMetrics.timestampStop = nanoSinceEpoch();
   LOG_INFO(testMetrics.makeReport());
 }
+
+int main() { hashLoadtest(); }

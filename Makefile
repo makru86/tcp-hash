@@ -48,7 +48,7 @@ build-release: configure-release
 	@cmake --build release -- -j 2
 
 test:
-	@ctest --test-dir build/libtcp_hash --output-on-failure
+	@cd build/libtcp_hash && ctest --output-on-failure
 
 clean:
 	@rm -rf build release
@@ -66,30 +66,21 @@ serve: build-release
 	@echo "tcp_hash is listening port 1234... Press Ctrl-C to stop"
 	@./release/tcp_hash/tcp_hash
 
-docker-test:
+docker:
+	@docker-compose up builder
+
+docker-test: docker
 	@docker-compose run builder bash -c "make test"
 
-docker-serve:
-	@docker-compose run builder bash -c "make serve"
+docker-serve: docker
+	@docker-compose run --service-ports --use-aliases builder bash -c "make clean && make serve"
 
-# formatted:
-# 		"find tcp_hash libtcp_hash -name \*.cpp -or -name \*.h | xargs clang-format -i"
-#
-# tidy-code:
-# 	@docker-compose run builder bash -c \
-# 		"find tcp_hash libtcp_hash -name \*.cpp -or -name \*.h | head -1 | xargs clang-tidy -p build/ --export-fixes build/fixes.yaml --fix --fix-errors"
-#
-# loadtest:
-# 	@echo "The Pressure is Rising, The Adrenaline is Rushing, The Clock is Ticking"
-# 	@docker-compose run builder \
-# 		./build/libtcp_hash/loadtest
-#
-# coverage-report:
-# 	@docker-compose run builder gcovr --print-summary --xml build/coverage.xml --xml-pretty build
-# 	@ls build/coverage.xml
-#
-# prototype-up:
-# 	@docker-compose -f docker-compose.yml -f compose-prototype.yaml up prototype
-#
-# prototype-down:
-# 	@docker-compose -f docker-compose.yml -f compose-prototype.yaml down --remove-orphans
+coverage-report:
+	@docker-compose run builder gcovr --print-summary --xml build/coverage.xml --xml-pretty build
+	@ls build/coverage.xml
+
+prototype-up:
+	@docker-compose -f docker-compose.yml -f compose-prototype.yaml up prototype
+
+prototype-down:
+	@docker-compose -f docker-compose.yml -f compose-prototype.yaml down --remove-orphans

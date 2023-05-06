@@ -1,5 +1,8 @@
 #pragma once
-#include <boost/system/detail/error_code.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/signal_set.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/util.hpp>
 
@@ -18,7 +21,7 @@ class Session : public std::enable_shared_from_this<Session<HasherType>> {
   enum { max_length = 1024 };
   char data_[max_length];
   char write_data_[max_length];
-  asio::static_thread_pool &thread_pool_;
+  asio::thread_pool &thread_pool_;
   std::shared_ptr<HasherType> hasher_;
 
 public:
@@ -26,14 +29,14 @@ public:
   using Ptr = std::shared_ptr<Self>;
 
 private:
-  Session(tcp::socket socket, asio::static_thread_pool &thread_pool,
+  Session(tcp::socket socket, asio::thread_pool &thread_pool,
           std::shared_ptr<HasherType> hasher)
       : socket_(std::move(socket)), thread_pool_{thread_pool}, hasher_{hasher} {
   }
 
 public:
   [[nodiscard]] static Ptr create(tcp::socket socket,
-                                  asio::static_thread_pool &thread_pool,
+                                  asio::thread_pool &thread_pool,
                                   std::shared_ptr<HasherType> hasher) {
     // Not using std::make_shared<> because the c'tor is private.
     return Ptr{new Self{std::move(socket), thread_pool, std::move(hasher)}};
@@ -61,8 +64,7 @@ private:
         });
   }
 
-  static void async_process(std::string data,
-                            asio::static_thread_pool &thread_pool,
+  static void async_process(std::string data, asio::thread_pool &thread_pool,
                             std::shared_ptr<Session> ses) {
 
     asio::post(
@@ -110,8 +112,8 @@ private:
 };
 
 template <class Hasher> class Server {
-  struct single_thread_pool : asio::static_thread_pool {
-    single_thread_pool() : asio::static_thread_pool{1} {}
+  struct single_thread_pool : asio::thread_pool {
+    single_thread_pool() : asio::thread_pool{1} {}
   };
 
 public:
