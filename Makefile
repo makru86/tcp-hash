@@ -63,6 +63,7 @@ formatted:
 	@find tcp_hash libtcp_hash -name \*pp | xargs clang-format -i
 
 serve: build-release
+	@echo "tcp_hash is listening port 1234... Press Ctrl-C to stop"
 	@./release/tcp_hash/tcp_hash
 
 docker-test:

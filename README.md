@@ -3,41 +3,43 @@
 ![](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
 ![](https://img.shields.io/badge/Code%20Coverage-55%25-success?style=flat)
 
-Ubuntu packages used in implementation (see [Dockerfile](Dockerfile)):
+Hash server:
 
-- libboost-all-dev mostly for Asio (see [asio-handler-tracking](assets/asio_handler_tracking.png))
+- 3 background threads to calculate hashes
+- main thread accepting connections and passing sockets to background threads
+- per socket server uses 2 x 1024 bytes for a buffer
+
+
+Implemented on top of Boost Asio and xxHash (see [Dockerfile](Dockerfile)):
+- see [asio-handler-tracking](assets/asio_handler_tracking.png))
 - libxxhash-dev
 
-- this project's template [zethon/CCCBTemplate](https://github.com/zethon/CCCBTemplate)
+- GitHub template [zethon/CCCBTemplate](https://github.com/zethon/CCCBTemplate)
 
+
+TODO:
+- very slow Integer to Hex string conversion (std::stream, setfill) - 50% of
+  server time
+- segfaults in xxHash on big input
 
 ## Building and running
 
-Checkout the code, create Docker container, build CMake project, run tests,
-start Docker service listening TCP port 1234:
+Checkout the code, create Docker container, start Docker service listening TCP port 1234:
 
 ```
     git clone https://github.com/makru86/tcp-hash.git
     cd tcp-hash
-    make up
+    make docker-serve # or make serve
 ```
 
 ## tcp-hash Prototype: shell script with ncat and xxhsum
 
-See [mock/tcp_hash.sh](mock/tcp_hash.sh).
-Start Docker service `prototype`  listening TCP port 1234:
-Press Ctrl-C to stop.
+See [tools/tcp_hash_prototype.sh](tools/tcp_hash_prototype.sh).
+See [tools/client.sh](tools/client.sh).
 
-```
-    make prototype-up &
-    ./tools/client.sh
-```
+## netcat example
 
-
-
-## Using with netcat
-
-netcat example, keep connection open, exit by Ctrl-C:
+Keep connection open, exit by Ctrl-C:
 
 ```
     netcat localhost 1234
@@ -61,17 +63,16 @@ netcat-openbsd (nc) example, closing connection after receiving response:
 
 ## Development
 
+```
+    make build  # or make docker-build
+    make test   # or make docker-test
+```
+
 ### Formatting code, clang-tidy
 
 ```
     make formatted
-    make tidy-code
-```
-
-### Benchmarking performance
-
-```
-    make loadtest
+    make tidy
 ```
 
 ### Code coverage report
