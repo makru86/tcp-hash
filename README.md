@@ -1,6 +1,6 @@
 # Project tcp-hash
 
-![](https://github.com/makru86/tcp-hash/actions/workflows/ubuntu.yml/badge.svg)
+![](https://github.com/makru86/tcp-hash/actions/workflows/build.yml/badge.svg)
 ![](https://img.shields.io/badge/Code%20Coverage-55%25-success?style=flat)
 
 Hash server:
