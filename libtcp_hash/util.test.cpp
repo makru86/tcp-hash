@@ -29,16 +29,20 @@ BOOST_AUTO_TEST_CASE(AnalyzeMetricsTest) {
   metrics.bytesSent = 600'000;       //
   metrics.messagesReceived = 30'000; //
 
-  BOOST_TEST(metrics.makeReport() == //
-             "\n"
-             " Hashrate:\n"
-             "   30000 MH/s\n"
-             " Latency:\n"
-             "   TODO\n"
-             " Average data size:\n"
-             "   20 B\n"
-             " Total time:\n"
-             "   1e-06 s\n");
+  BOOST_TEST(metrics.makeReport() == R""(
+ Hashrate:
+   30000 MH/s
+ Latency:
+   TODO
+ Average size: 20 B
+ Total time:   1e-06 s
+ Messages:
+   sent:       0
+   received:   30000
+ Bytes:
+   sent:       0.6 MiB
+   received:   0 MiB
+)"");
 }
 
 BOOST_AUTO_TEST_CASE(RandomStringTest) {
