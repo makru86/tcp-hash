@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <iostream>
 #include <libtcp_hash/client.hpp>
-#include <libtcp_hash/hash.hpp>
 #include <libtcp_hash/util.hpp>
 #include <memory>
 #include <string>
